@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-03-19 Fri 21:05 -->
+<!-- 2021-03-20 Sat 11:25 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Spark on your Oracle Data Warehouse</title>
@@ -180,12 +180,17 @@
   .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
-<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/readtheorg.css"/>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/bigblow_theme/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/bigblow_theme/css/bigblow.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/bigblow_theme/css/hideshow.css"/>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery-ui-1.10.2.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery.localscroll-min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery.scrollTo-1.4.3.1-min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery.zclip.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/bigblow.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/hideshow.js"></script>
 <script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
-<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -240,41 +245,52 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org900c60e">1. Background and Motivation</a>
+<li><a href="#org654389f">1. Background and Motivation</a>
 <ul>
-<li><a href="#orga8ebb58">1.1. Reality of these deployments</a></li>
-<li><a href="#org9fad655">1.2. For the Oracle customer</a></li>
+<li><a href="#org9640387">1.1. Reality of these deployments</a></li>
+<li><a href="#org565e5a5">1.2. For the Oracle customer</a></li>
 </ul>
 </li>
-<li><a href="#orgd4a6603">2. Our Solution: An integrated platform</a></li>
-<li><a href="#orge799238">3. Summary of Spark Extensions</a>
+<li><a href="#org039fa37">2. Our Solution: An integrated platform</a></li>
+<li><a href="#orgcb63988">3. Summary of Spark Extensions</a>
 <ul>
-<li><a href="#org389a807">3.1. Catalog Integration</a></li>
-<li><a href="#org9488b48">3.2. SQL Translation and Pushdown</a></li>
-<li><a href="#org82226e1">3.3. Language Integration</a>
+<li><a href="#orgb4adbcb">3.1. Catalog Integration</a></li>
+<li><a href="#org5c0a107">3.2. SQL Translation and Pushdown</a></li>
+<li><a href="#org8827de4">3.3. Language Integration</a>
 <ul>
-<li><a href="#org8601af0">3.3.1. Spark SQL Macros</a></li>
+<li><a href="#orgb894ff5">3.3.1. Spark SQL Macros</a></li>
 </ul>
 </li>
-<li><a href="#orgb557cb4">3.4. Runtime Integration</a></li>
+<li><a href="#org0359bbb">3.4. Runtime Integration</a></li>
 </ul>
 </li>
-<li><a href="#orgf3f4117">4. A Peek under the covers</a>
+<li><a href="#orgec37ca1">4. A Peek under the covers</a>
 <ul>
-<li><a href="#orgfe50251">4.1. Catalog Integration</a></li>
-<li><a href="#orgd3764f2">4.2. TPCDS Queries</a></li>
-<li><a href="#orgf346166">4.3. Spark SQL Macros</a></li>
+<li><a href="#org48d9157">4.1. Catalog Integration</a></li>
+<li><a href="#orgf089ba3">4.2. TPCDS Queries</a>
+<ul>
+<li><a href="#orgfa8c87b">4.2.1. Q1</a></li>
+<li><a href="#org099b359">4.2.2. Pushdown plan for Q5, Q69</a></li>
+</ul>
+</li>
+<li><a href="#orgb90f242">4.3. Spark SQL Macros</a>
+<ul>
+<li><a href="#org3fee407">4.3.1. Defining Macros</a></li>
+<li><a href="#org1f2ed14">4.3.2. Tax and Discount Calculation</a></li>
+<li><a href="#orga31ce17">4.3.3. Query Plan and execution</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org900c60e" class="outline-2">
-<h2 id="org900c60e"><span class="section-number-2">1</span> Background and Motivation</h2>
+<div id="outline-container-org654389f" class="outline-2">
+<h2 id="org654389f"><span class="section-number-2">1</span> Background and Motivation</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-Figure <a href="#org6829f31">1</a> depicts a not uncommon
+Figure <a href="#orgb902eca">1</a> depicts a not uncommon
 deployment for an Enterprise that uses both open source systems and an Oracle Warehouse.
 Enterprises are moving some of their production workloads to open source based
 systems with the current favorite being <a href="https://spark.apache.org/">Apache Spark</a>.
@@ -295,7 +311,7 @@ nowadays to avoid vendor lock in.</li>
 </ul>
 
 
-<div id="org6829f31" class="figure">
+<div id="orgb902eca" class="figure">
 <p><img src="./images/entDep.png" alt="entDep.png" width="70%" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Enterprise Data Lake</p>
@@ -309,8 +325,8 @@ Business Intelligence Dashboards and Reports, Financial Planning etc.
 </p>
 </div>
 
-<div id="outline-container-orga8ebb58" class="outline-3">
-<h3 id="orga8ebb58"><span class="section-number-3">1.1</span> Reality of these deployments</h3>
+<div id="outline-container-org9640387" class="outline-3">
+<h3 id="org9640387"><span class="section-number-3">1.1</span> Reality of these deployments</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 Even though open source systems share the storage fabric with the Oracle
@@ -325,7 +341,7 @@ expression mapping issues.
 </p>
 
 
-<div id="org3e171ca" class="figure">
+<div id="org6e98667" class="figure">
 <p><img src="./images/conn.png" alt="conn.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 2: </span>Non-optimal Data movement and Work coordination between systems</p>
@@ -333,8 +349,8 @@ expression mapping issues.
 </div>
 </div>
 
-<div id="outline-container-org9fad655" class="outline-3">
-<h3 id="org9fad655"><span class="section-number-3">1.2</span> For the Oracle customer</h3>
+<div id="outline-container-org565e5a5" class="outline-3">
+<h3 id="org565e5a5"><span class="section-number-3">1.2</span> For the Oracle customer</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 Within the space of multi-system deployments there is a segment of customer whose
@@ -356,7 +372,7 @@ hours&#x2026; larger organizations can save as much as <code>$7.9</code> million
 </ul>
 
 
-<div id="org58488df" class="figure">
+<div id="orgacc2f89" class="figure">
 <p><img src="./images/statusquo.png" alt="statusquo.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 3: </span>Reality: Oracle Customers and Spark</p>
@@ -365,8 +381,8 @@ hours&#x2026; larger organizations can save as much as <code>$7.9</code> million
 </div>
 </div>
 
-<div id="outline-container-orgd4a6603" class="outline-2">
-<h2 id="orgd4a6603"><span class="section-number-2">2</span> Our Solution: An integrated platform</h2>
+<div id="outline-container-org039fa37" class="outline-2">
+<h2 id="org039fa37"><span class="section-number-2">2</span> Our Solution: An integrated platform</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 We provide Oracle Customers with a <b>more integrated environment</b> where
@@ -388,7 +404,7 @@ operationally simpler Spark clusters.</b>
 </p>
 
 
-<div id="orge39b71e" class="figure">
+<div id="org444069d" class="figure">
 <p><img src="./images/spark_on_ora_goals.png" alt="spark_on_ora_goals.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 4: </span>An integrated Oracle and Spark architecture</p>
@@ -425,7 +441,7 @@ be shipped to the Oracle instances for execution.</dd>
 </dl>
 
 
-<div id="orgc930509" class="figure">
+<div id="org061e548" class="figure">
 <p><img src="./images/spark_on_ora_goals2.png" alt="spark_on_ora_goals2.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 5: </span>Capabilities of an integrated system</p>
@@ -433,12 +449,12 @@ be shipped to the Oracle instances for execution.</dd>
 </div>
 </div>
 
-<div id="outline-container-orge799238" class="outline-2">
-<h2 id="orge799238"><span class="section-number-2">3</span> Summary of Spark Extensions</h2>
+<div id="outline-container-orgcb63988" class="outline-2">
+<h2 id="orgcb63988"><span class="section-number-2">3</span> Summary of Spark Extensions</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-org389a807" class="outline-3">
-<h3 id="org389a807"><span class="section-number-3">3.1</span> Catalog Integration</h3>
+<div id="outline-container-orgb4adbcb" class="outline-3">
+<h3 id="orgb4adbcb"><span class="section-number-3">3.1</span> Catalog Integration</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 We leverage the <a href="https://databricks.com/session/apache-spark-data-source-v2">Catalog Integration and DataSources v2 API</a>
@@ -453,8 +469,8 @@ data consistency model.
 </div>
 </div>
 
-<div id="outline-container-org9488b48" class="outline-3">
-<h3 id="org9488b48"><span class="section-number-3">3.2</span> SQL Translation and Pushdown</h3>
+<div id="outline-container-org5c0a107" class="outline-3">
+<h3 id="org5c0a107"><span class="section-number-3">3.2</span> SQL Translation and Pushdown</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 These are based on techniques developed over many years to extend the Spark
@@ -470,11 +486,11 @@ analysis pipelines containing all the analytical functions and operators</b>
 <p>
 For the <a href="http://www.tpc.org/tpcds/">TPCDS benchmark</a> we are able to completely pushed down over 90 of the 99 queries.
 For example following this the non-pushdown vs pushdown plan for TPCDS query
-q1. We provide more details about TPCDS query-set in the <a href="#orgd3764f2">TPCDS Queries section</a>.
+q1. We provide more details about TPCDS query-set in the <a href="#orgf089ba3">TPCDS Queries section</a>.
 </p>
 
 
-<div id="orgaba0d12" class="figure">
+<div id="orgfadf9e4" class="figure">
 <p><img src="./images/tpcds_q1.png" alt="tpcds_q1.png" width="60%" height="60%" />
 </p>
 <p><span class="figure-number">Figure 6: </span>TPCDS Query Q1: non-pushdown vs pushdown plan.</p>
@@ -491,7 +507,7 @@ result.  The query can be split by <b>Input Table(s) partitions or blocks</b> or
 </p>
 
 
-<div id="org08d1eb2" class="figure">
+<div id="org79eb2c2" class="figure">
 <p><img src="./images/parallelDataMove.png" alt="parallelDataMove.png" width="60%" />
 </p>
 <p><span class="figure-number">Figure 7: </span>Query Splitting</p>
@@ -508,7 +524,7 @@ on commit.
 </p>
 
 
-<div id="orgc37f791" class="figure">
+<div id="org7951fe7" class="figure">
 <p><img src="./images/basicInsertFlow.png" alt="basicInsertFlow.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 8: </span>Insert Flow</p>
@@ -516,8 +532,8 @@ on commit.
 </div>
 </div>
 
-<div id="outline-container-org82226e1" class="outline-3">
-<h3 id="org82226e1"><span class="section-number-3">3.3</span> Language Integration</h3>
+<div id="outline-container-org8827de4" class="outline-3">
+<h3 id="org8827de4"><span class="section-number-3">3.3</span> Language Integration</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 We leverage the ability to register of Custom Functions in Spark to enable the
@@ -532,8 +548,8 @@ Spark programming model.
 </p>
 </div>
 
-<div id="outline-container-org8601af0" class="outline-4">
-<h4 id="org8601af0"><span class="section-number-4">3.3.1</span> Spark SQL Macros</h4>
+<div id="outline-container-orgb894ff5" class="outline-4">
+<h4 id="orgb894ff5"><span class="section-number-4">3.3.1</span> Spark SQL Macros</h4>
 <div class="outline-text-4" id="text-3-3-1">
 <p>
 Spark provides the ability to register custom functions written in Scala.
@@ -544,7 +560,7 @@ the associated function body.
 </p>
 
 
-<div id="orgf3d82c0" class="figure">
+<div id="orgb0fbb06" class="figure">
 <p><img src="./images/spark_cust_fn.png" alt="spark_cust_fn.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 9: </span>Spark Function Registration and Execution</p>
@@ -569,7 +585,7 @@ presence of these kinds of custom UDFs.*</li>
 </ul>
 
 
-<div id="orgf4cdbed" class="figure">
+<div id="org7f63e23" class="figure">
 <p><img src="./images/spark-macro-reg.png" alt="spark-macro-reg.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 10: </span>Spark SQL Macro Registration and Execution</p>
@@ -578,8 +594,8 @@ presence of these kinds of custom UDFs.*</li>
 </div>
 </div>
 
-<div id="outline-container-orgb557cb4" class="outline-3">
-<h3 id="orgb557cb4"><span class="section-number-3">3.4</span> Runtime Integration</h3>
+<div id="outline-container-org0359bbb" class="outline-3">
+<h3 id="org0359bbb"><span class="section-number-3">3.4</span> Runtime Integration</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 We are investigating the concept of a <b>Spark Co-Processor</b>. A co-processor will
@@ -606,7 +622,7 @@ its definition.
 </p>
 
 
-<div id="org92cd4d9" class="figure">
+<div id="orge7a29e2" class="figure">
 <p><img src="./images/log_tbl_fun.png" alt="log_tbl_fun.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 11: </span>Logical Oracle Plan structure with Table function calls</p>
@@ -616,14 +632,14 @@ its definition.
 </div>
 
 
-<div id="outline-container-orgf3f4117" class="outline-2">
-<h2 id="orgf3f4117"><span class="section-number-2">4</span> A Peek under the covers</h2>
+<div id="outline-container-orgec37ca1" class="outline-2">
+<h2 id="orgec37ca1"><span class="section-number-2">4</span> A Peek under the covers</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-WE walk through a sample Spark Session of this integrated environment. The
-Oracle Instance is loaded with the <a href="http://www.tpc.org/tpcds/">TPCDS dataset</a> and we connect to it via a
-<i>Spark Shell</i> session. The Spark Configuration has settings for this integrated
-environment such as connection information and query pushdown instructions.
+We walk through a sample session of this integrated environment by showing some
+examples. The Oracle Instance is loaded with the <a href="http://www.tpc.org/tpcds/">TPCDS dataset</a> and we connect to it via
+<i>Spark Shell</i>. The Spark Configuration has the following settings for this integrated
+environment: parameters such as the connection information and query pushdown instructions.
 </p>
 
 <div class="org-src-container">
@@ -663,38 +679,522 @@ local[*]</code>.
 </p>
 </div>
 
-<div id="outline-container-orgfe50251" class="outline-3">
-<h3 id="orgfe50251"><span class="section-number-3">4.1</span> Catalog Integration</h3>
+<div id="outline-container-org48d9157" class="outline-3">
+<h3 id="org48d9157"><span class="section-number-3">4.1</span> Catalog Integration</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
-The user can browse the Oracle catalog and describe individual tables:
+The user can browse the Oracle catalog and describe individual tables.
+Oracle has many partitioning schemes such as  <b>RANGE, LIST, INTERVAL, and HASH</b>
+which don't map very well to Spark's value based partitioning scheme; the output
+Spark SQL <code>show partitions</code> command doesn't give the full partitioning picture.
+So we have extended Spark SQL; users can issue <code>show oracle partitions</code> to
+see the table partitioning details.
 </p>
 
 <div class="org-src-container">
 <pre class="src src-scala">sql("use oracle").show()
 sql("show tables").show(10000, false)
 
+// show partitions
+sql("show partitions store_sales").show(1000, false)
+// spark language extension  to see oracle partitions properly
+sql("show oracle partitions store_sales").show(1000, false)
+</pre>
+</div>
+
+
+<div id="org73f9145" class="figure">
+<p><img src="./images/catalog.png" alt="catalog.png" width="90%" />
+</p>
+<p><span class="figure-number">Figure 12: </span>Catalog Commands</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf089ba3" class="outline-3">
+<h3 id="orgf089ba3"><span class="section-number-3">4.2</span> TPCDS Queries</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+The <a href="http://www.tpc.org/tpcds/">TPCDS benchmark</a> contains many complex analysis patterns such
+<code>Star-Schema-Agg-Joins</code>, <code>Multi-Star-Schema-Analysis</code>, <code>Windowing-Functions</code>,
+<code>Correlated-SubQueries</code> etc. As we have mentioned we are able to completely
+pushed down over 90 of the 99 queries.
+</p>
+</div>
+
+<div id="outline-container-orgfa8c87b" class="outline-4">
+<h4 id="orgfa8c87b"><span class="section-number-4">4.2.1</span> Q1</h4>
+<div class="outline-text-4" id="text-4-2-1">
+<ul class="org-ul">
+<li>Query is about identifying 'problem' customers.</li>
+<li>Query involves joins, aggregates, a CTE, a subquery expression, Order By</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-scala">val q1 = s""" with customer_total_return as
+(select sr_customer_sk as ctr_customer_sk
+,sr_store_sk as ctr_store_sk
+,sum(SR_RETURN_AMT) as ctr_total_return
+from store_returns
+,date_dim
+where sr_returned_date_sk = d_date_sk
+and d_year =2000
+group by sr_customer_sk
+,sr_store_sk)
+ select  c_customer_id
+from customer_total_return ctr1
+,store
+,customer
+where ctr1.ctr_total_return &gt; (select avg(ctr_total_return)*1.2
+from customer_total_return ctr2
+where ctr1.ctr_store_sk = ctr2.ctr_store_sk)
+and s_store_sk = ctr1.ctr_store_sk
+and s_state = 'TN'
+and ctr1.ctr_customer_sk = c_customer_sk
+order by c_customer_id
+ limit 100; """.stripMargin
+```
 </pre>
 </div>
 
 <p>
-Picture for show partitions also
+Running this query <code>sql(q1).show(1000000, false)</code> with the <code>pushdown flag on</code> pushes
+the entire query to Oracle and it runs in sub-second time. Issuing a
+<code>sql(s"explain oracle pushdown $q1").show(1000, false)</code>
+shows the Spark Plan and the Oracle Query pushed down. (here again we have
+extended Spark SQL with the <code>explain oracle pushdown</code> command which is similar
+to Spark's <code>explain</code> command with the addition that we show the oracle pushdown
+details). The output shows that for Spark this is a very simple Plan of a custom
+<code>Scan</code> followed by a <code>Project</code>. Figure <a href="#orgfadf9e4">6</a> show the plan visually.
 </p>
+<div class="org-src-container">
+<pre class="src src-text">sql(s"explain oracle pushdown $q1").show(1000, false)
+
+|Project (1)
++- BatchScan (2)
+
+(2) BatchScan
+Oracle Instance:
+   DataSourceKey(jdbc:oracle:thin:@den02ads:1531/cdb1_pdb7.regress.rdbms.dev.us.oracle.com,tpcds)
+Pushdown Oracle SQL:
+select "C_CUSTOMER_ID"
+from ( select "C_CUSTOMER_ID"
+from ( select "SR_CUSTOMER_SK" AS "ctr_customer_sk", "SR_STORE_SK" AS "ctr_store_sk", SUM("SR_RETURN_AMT") AS "ctr_total_return"
+from TPCDS.STORE_RETURNS  join TPCDS.DATE_DIM  on ("SR_RETURNED_DATE_SK" = "D_DATE_SK")
+where ((("SR_STORE_SK" IS NOT NULL AND "SR_CUSTOMER_SK" IS NOT NULL) AND "SR_RETURNED_DATE_SK" IS NOT NULL) AND ("D_YEAR" IS NOT NULL AND ("D_YEAR" = 2000.000000000000000000)))
+group by "SR_CUSTOMER_SK", "SR_STORE_SK" )  join ( select "1_sparkora", "2_sparkora"
+from ( select (AVG("ctr_total_return") * 1.2000000000000000000000) AS "1_sparkora", "ctr_store_sk" AS "2_sparkora"
+from ( select "SR_STORE_SK" AS "ctr_store_sk", SUM("SR_RETURN_AMT") AS "ctr_total_return"
+from TPCDS.STORE_RETURNS  join TPCDS.DATE_DIM  on ("SR_RETURNED_DATE_SK" = "D_DATE_SK")
+where (("SR_STORE_SK" IS NOT NULL AND ("SR_RETURNED_DATE_SK" IS NOT NULL AND "SR_RETURNED_DATE_SK" IS NOT NULL)) AND ("D_YEAR" IS NOT NULL AND ("D_YEAR" = 2000.000000000000000000)))
+group by "SR_CUSTOMER_SK", "SR_STORE_SK" )
+group by "ctr_store_sk" )
+where "1_sparkora" IS NOT NULL )  on (("ctr_store_sk" = "2_sparkora") AND (cast("ctr_total_return" as NUMBER(38, 20)) &gt; "1_sparkora")) join TPCDS.STORE  on ("ctr_store_sk" = "S_STORE_SK") join TPCDS.CUSTOMER  on ("ctr_customer_sk" = "C_CUSTOMER_SK")
+where ("ctr_total_return" IS NOT NULL AND ("S_STATE" IS NOT NULL AND ("S_STATE" = 'TN')))
+order by "C_CUSTOMER_ID" ASC NULLS FIRST )
+where rownum &lt;= 100
+Pushdown Oracle SQL, Query Splitting details:
+Query is not split
+</pre>
+</div>
+
+<p>
+Contrast this with the plan when <code>spark.sql.oracle.enable.pushdown=false</code>. This
+setting turns of the Query rewrites, so the query plan generated and execution
+is similar to what you would get with a regular 'connector' that provides a
+custom Spark v2 DataSource. The Spark Plan contains Operation to do all the
+Joins, Aggregates&#x2026; only the base Table rows are pulled out of Oracle. Figure
+<a href="#orgfadf9e4">6</a> show the plan visually. Not surprisingly execution with pushdown off
+takes considerably longer to run: 10s of seconds. 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text">sql(s"explain oracle pushdown $q1").show(1000, false)
+
+|TakeOrderedAndProject (1)
++- Project (2)
+   +- SortMergeJoin Inner (3)
+      :- Project (4)
+      :  +- SortMergeJoin Inner (5)
+      :     :- Project (6)
+      :     :  +- SortMergeJoin Inner (7)
+      :     :     :- Filter (8)
+      :     :     :  +- HashAggregate (9)
+      :     :     :     +- HashAggregate (10)
+      :     :     :        +- Project (11)
+      :     :     :           +- SortMergeJoin Inner (12)
+      :     :     :              :- Project (13)
+      :     :     :              :  +- Filter (14)
+      :     :     :              :     +- BatchScan (15)
+      :     :     :              +- Project (16)
+      :     :     :                 +- Filter (17)
+      :     :     :                    +- BatchScan (18)
+      :     :     +- Filter (19)
+      :     :        +- HashAggregate (20)
+      :     :           +- HashAggregate (21)
+      :     :              +- HashAggregate (22)
+      :     :                 +- HashAggregate (23)
+      :     :                    +- Project (24)
+      :     :                       +- SortMergeJoin Inner (25)
+      :     :                          :- Project (26)
+      :     :                          :  +- Filter (27)
+      :     :                          :     +- BatchScan (28)
+      :     :                          +- Project (29)
+      :     :                             +- Filter (30)
+      :     :                                +- BatchScan (31)
+      :     +- Project (32)
+      :        +- Filter (33)
+      :           +- BatchScan (34)
+      +- Project (35)
+         +- BatchScan (36)
+
+(15) BatchScan
+Oracle Instance:
+   DataSourceKey(jdbc:oracle:thin:@den02ads:1531/cdb1_pdb7.regress.rdbms.dev.us.oracle.com,tpcds)
+Pushdown Oracle SQL:
+select "SR_CUSTOMER_SK", "SR_STORE_SK", "SR_RETURN_AMT", "SR_RETURNED_DATE_SK"
+from TPCDS.STORE_RETURNS
+where ("SR_STORE_SK" IS NOT NULL AND "SR_CUSTOMER_SK" IS NOT NULL) and "SR_RETURNED_DATE_SK" IS NOT NULL
+Pushdown Oracle SQL, Query Splitting details:
+Query is not split
+(18) BatchScan
+Oracle Instance:
+   DataSourceKey(jdbc:oracle:thin:@den02ads:1531/cdb1_pdb7.regress.rdbms.dev.us.oracle.com,tpcds)
+Pushdown Oracle SQL:
+select "D_DATE_SK", "D_YEAR"
+from TPCDS.DATE_DIM
+where ("D_YEAR" IS NOT NULL AND ("D_YEAR" = 2000.000000000000000000))
+Pushdown Oracle SQL, Query Splitting details:
+Query is not split
+(28) BatchScan
+Oracle Instance:
+   DataSourceKey(jdbc:oracle:thin:@den02ads:1531/cdb1_pdb7.regress.rdbms.dev.us.oracle.com,tpcds)
+Pushdown Oracle SQL:
+select "SR_CUSTOMER_SK", "SR_STORE_SK", "SR_RETURN_AMT", "SR_RETURNED_DATE_SK"
+from TPCDS.STORE_RETURNS
+where "SR_STORE_SK" IS NOT NULL and ("SR_RETURNED_DATE_SK" IS NOT NULL AND "SR_RETURNED_DATE_SK" IS NOT NULL)
+Pushdown Oracle SQL, Query Splitting details:
+Query is not split
+(31) BatchScan
+Oracle Instance:
+   DataSourceKey(jdbc:oracle:thin:@den02ads:1531/cdb1_pdb7.regress.rdbms.dev.us.oracle.com,tpcds)
+Pushdown Oracle SQL:
+select "D_DATE_SK", "D_YEAR"
+from TPCDS.DATE_DIM
+where ("D_YEAR" IS NOT NULL AND ("D_YEAR" = 2000.000000000000000000))
+Pushdown Oracle SQL, Query Splitting details:
+Query is not split
+(34) BatchScan
+Oracle Instance:
+   DataSourceKey(jdbc:oracle:thin:@den02ads:1531/cdb1_pdb7.regress.rdbms.dev.us.oracle.com,tpcds)
+Pushdown Oracle SQL:
+select "S_STORE_SK", "S_STATE"
+from TPCDS.STORE
+where ("S_STATE" IS NOT NULL AND ("S_STATE" = 'TN'))
+Pushdown Oracle SQL, Query Splitting details:
+Query is not split
+(36) BatchScan
+Oracle Instance:
+   DataSourceKey(jdbc:oracle:thin:@den02ads:1531/cdb1_pdb7.regress.rdbms.dev.us.oracle.com,tpcds)
+Pushdown Oracle SQL:
+select "C_CUSTOMER_SK", "C_CUSTOMER_ID"
+from TPCDS.CUSTOMER
+Pushdown Oracle SQL, Query Splitting details:
+Query is not split
+</pre>
+</div>
 </div>
 </div>
 
-<div id="outline-container-orgd3764f2" class="outline-3">
-<h3 id="orgd3764f2"><span class="section-number-3">4.2</span> TPCDS Queries</h3>
+<div id="outline-container-org099b359" class="outline-4">
+<h4 id="org099b359"><span class="section-number-4">4.2.2</span> Pushdown plan for Q5, Q69</h4>
+<div class="outline-text-4" id="text-4-2-2">
+<p>
+Here are pushdown plans for couple more TPCDS queries.
+</p>
+<ul class="org-ul">
+<li>Query Q5 is a report across Sales, Web and Catalog channels. Its SQL contains
+joins, aggregates, unions, CTEs, rollup.</li>
+<li>Query 69 is used to identify customers with different buying behavior in 2
+separate quarters. Its SQL contains joins, aggregates, subquery predicates.</li>
+</ul>
+
+<p>
+<b>TPCDS Q5 oracle pushdown:</b>
+</p>
+<div class="org-src-container">
+<pre class="src src-text">sql(s"explain oracle pushdown $q5").show(1000, false)
+
+|Project (1)
++- BatchScan (2)
+
+(2) BatchScan
+Oracle Instance:
+   DataSourceKey(jdbc:oracle:thin:@den02ads:1531/cdb1_pdb7.regress.rdbms.dev.us.oracle.com,tpcds)
+Pushdown Oracle SQL:
+select "channel_10_sparkora", "id_6_sparkora", "sales", "returns", "profit"
+from ( select "channel_10_sparkora", "id_6_sparkora", SUM("sales") AS "sales", SUM("returns") AS "returns", SUM("profit") AS "profit"
+from ( select SUM("sales_price") AS "sales", SUM("return_amt") AS "returns", (cast(SUM("profit") as NUMBER(38, 17)) - cast(SUM("net_loss") as NUMBER(38, 17))) AS "profit", 'store channel' AS "channel", CONCAT('store' , "S_STORE_ID") AS "id"
+from ( select "SS_STORE_SK" AS "store_sk", "SS_SOLD_DATE_SK" AS "date_sk", "SS_EXT_SALES_PRICE" AS "sales_price", "SS_NET_PROFIT" AS "profit", 0E-18 AS "return_amt", 0E-18 AS "net_loss"
+from TPCDS.STORE_SALES
+where ("SS_STORE_SK" IS NOT NULL AND "SS_SOLD_DATE_SK" IS NOT NULL) UNION ALL select "SR_STORE_SK" AS "store_sk", "SR_RETURNED_DATE_SK" AS "date_sk", 0E-18 AS "sales_price", 0E-18 AS "profit", "SR_RETURN_AMT" AS "return_amt", "SR_NET_LOSS" AS "net_loss"
+from TPCDS.STORE_RETURNS
+where ("SR_STORE_SK" IS NOT NULL AND "SR_RETURNED_DATE_SK" IS NOT NULL) )  join TPCDS.DATE_DIM  on ("date_sk" = "D_DATE_SK") join TPCDS.STORE  on ("store_sk" = "S_STORE_SK")
+where (("D_DATE" IS NOT NULL AND ("D_DATE" &gt;= TRUNC(TIMESTAMP '2000-08-23 07:00:00.000000'))) AND ("D_DATE" &lt;= TRUNC(TIMESTAMP '2000-09-06 07:00:00.000000')))
+group by "S_STORE_ID" UNION ALL select SUM("sales_price") AS "sales", SUM("return_amt") AS "returns", (cast(SUM("profit") as NUMBER(38, 17)) - cast(SUM("net_loss") as NUMBER(38, 17))) AS "profit", 'catalog channel' AS "channel", CONCAT('catalog_page' , "CP_CATALOG_PAGE_ID") AS "id"
+from ( select "CS_CATALOG_PAGE_SK" AS "page_sk", "CS_SOLD_DATE_SK" AS "date_sk", "CS_EXT_SALES_PRICE" AS "sales_price", "CS_NET_PROFIT" AS "profit", 0E-18 AS "return_amt", 0E-18 AS "net_loss"
+from TPCDS.CATALOG_SALES
+where ("CS_CATALOG_PAGE_SK" IS NOT NULL AND "CS_SOLD_DATE_SK" IS NOT NULL) UNION ALL select "CR_CATALOG_PAGE_SK" AS "page_sk", "CR_RETURNED_DATE_SK" AS "date_sk", 0E-18 AS "sales_price", 0E-18 AS "profit", "CR_RETURN_AMOUNT" AS "return_amt", "CR_NET_LOSS" AS "net_loss"
+from TPCDS.CATALOG_RETURNS
+where ("CR_CATALOG_PAGE_SK" IS NOT NULL AND "CR_RETURNED_DATE_SK" IS NOT NULL) )  join TPCDS.DATE_DIM  on ("date_sk" = "D_DATE_SK") join TPCDS.CATALOG_PAGE  on ("page_sk" = "CP_CATALOG_PAGE_SK")
+where (("D_DATE" IS NOT NULL AND ("D_DATE" &gt;= TRUNC(TIMESTAMP '2000-08-23 07:00:00.000000'))) AND ("D_DATE" &lt;= TRUNC(TIMESTAMP '2000-09-06 07:00:00.000000')))
+group by "CP_CATALOG_PAGE_ID" UNION ALL select SUM("sales_price") AS "sales", SUM("return_amt") AS "returns", (cast(SUM("profit") as NUMBER(38, 17)) - cast(SUM("net_loss") as NUMBER(38, 17))) AS "profit", 'web channel' AS "channel", CONCAT('web_site' , "WEB_SITE_ID") AS "id"
+from ( select "WS_WEB_SITE_SK" AS "wsr_web_site_sk", "WS_SOLD_DATE_SK" AS "date_sk", "WS_EXT_SALES_PRICE" AS "sales_price", "WS_NET_PROFIT" AS "profit", 0E-18 AS "return_amt", 0E-18 AS "net_loss"
+from TPCDS.WEB_SALES
+where ("WS_WEB_SITE_SK" IS NOT NULL AND "WS_SOLD_DATE_SK" IS NOT NULL) UNION ALL select "WS_WEB_SITE_SK" AS "wsr_web_site_sk", "WR_RETURNED_DATE_SK" AS "date_sk", 0E-18 AS "sales_price", 0E-18 AS "profit", "WR_RETURN_AMT" AS "return_amt", "WR_NET_LOSS" AS "net_loss"
+from TPCDS.WEB_RETURNS  join TPCDS.WEB_SALES  on (("WR_ITEM_SK" = "WS_ITEM_SK") AND ("WR_ORDER_NUMBER" = "WS_ORDER_NUMBER"))
+where ("WR_RETURNED_DATE_SK" IS NOT NULL AND "WS_WEB_SITE_SK" IS NOT NULL) )  join TPCDS.DATE_DIM  on ("date_sk" = "D_DATE_SK") join TPCDS.WEB_SITE  on ("wsr_web_site_sk" = "WEB_SITE_SK")
+where (("D_DATE" IS NOT NULL AND ("D_DATE" &gt;= TRUNC(TIMESTAMP '2000-08-23 07:00:00.000000'))) AND ("D_DATE" &lt;= TRUNC(TIMESTAMP '2000-09-06 07:00:00.000000')))
+group by "WEB_SITE_ID" )   , lateral ( select "channel" "channel_10_sparkora", "id" "id_6_sparkora", 0 "spark_grouping_id_8_sparkora" from dual union all select "channel", null, 1 from dual union all select null, null, 3 from dual )
+group by "channel_10_sparkora", "id_6_sparkora", "spark_grouping_id_8_sparkora"
+order by "channel_10_sparkora" ASC NULLS FIRST, "id_6_sparkora" ASC NULLS FIRST )
+where rownum &lt;= 100
+Pushdown Oracle SQL, Query Splitting details:
+Query is not split
+</pre>
 </div>
 
-<div id="outline-container-orgf346166" class="outline-3">
-<h3 id="orgf346166"><span class="section-number-3">4.3</span> Spark SQL Macros</h3>
+<p>
+<b>TPCDS Q69 oracle pushdown:</b>
+</p>
+<div class="org-src-container">
+<pre class="src src-text">sql(s"explain oracle pushdown $q69").show(1000, false)
+
+|Project (1)
++- BatchScan (2)
+
+(2) BatchScan
+Oracle Instance:
+   DataSourceKey(jdbc:oracle:thin:@den02ads:1531/cdb1_pdb7.regress.rdbms.dev.us.oracle.com,tpcds)
+Pushdown Oracle SQL:
+select "CD_GENDER", "CD_MARITAL_STATUS", "CD_EDUCATION_STATUS", "cnt1", "CD_PURCHASE_ESTIMATE", "cnt2", "CD_CREDIT_RATING", "cnt3"
+from ( select "CD_GENDER", "CD_MARITAL_STATUS", "CD_EDUCATION_STATUS", COUNT(1) AS "cnt1", "CD_PURCHASE_ESTIMATE", COUNT(1) AS "cnt2", "CD_CREDIT_RATING", COUNT(1) AS "cnt3"
+from TPCDS.CUSTOMER "sparkora_0" join TPCDS.CUSTOMER_ADDRESS  on ("C_CURRENT_ADDR_SK" = "CA_ADDRESS_SK") join TPCDS.CUSTOMER_DEMOGRAPHICS  on ("C_CURRENT_CDEMO_SK" = "CD_DEMO_SK")
+where ((((("C_CURRENT_ADDR_SK" IS NOT NULL AND "C_CURRENT_CDEMO_SK" IS NOT NULL) AND  "sparkora_0"."C_CUSTOMER_SK" IN ( select "SS_CUSTOMER_SK"
+from TPCDS.STORE_SALES  join TPCDS.DATE_DIM  on ("SS_SOLD_DATE_SK" = "D_DATE_SK")
+where ("SS_SOLD_DATE_SK" IS NOT NULL AND (((("D_YEAR" IS NOT NULL AND "D_MOY" IS NOT NULL) AND ("D_YEAR" = 2001.000000000000000000)) AND ("D_MOY" &gt;= 4.000000000000000000)) AND ("D_MOY" &lt;= 6.000000000000000000))) )) AND not exists ( select 1
+from TPCDS.WEB_SALES  join TPCDS.DATE_DIM  on ("WS_SOLD_DATE_SK" = "D_DATE_SK")
+where (("WS_SOLD_DATE_SK" IS NOT NULL AND (((("D_YEAR" IS NOT NULL AND "D_MOY" IS NOT NULL) AND ("D_YEAR" = 2001.000000000000000000)) AND ("D_MOY" &gt;= 4.000000000000000000)) AND ("D_MOY" &lt;= 6.000000000000000000))) AND ("sparkora_0"."C_CUSTOMER_SK" = "WS_BILL_CUSTOMER_SK")) )) AND not exists ( select 1
+from TPCDS.CATALOG_SALES  join TPCDS.DATE_DIM  on ("CS_SOLD_DATE_SK" = "D_DATE_SK")
+where (("CS_SOLD_DATE_SK" IS NOT NULL AND (((("D_YEAR" IS NOT NULL AND "D_MOY" IS NOT NULL) AND ("D_YEAR" = 2001.000000000000000000)) AND ("D_MOY" &gt;= 4.000000000000000000)) AND ("D_MOY" &lt;= 6.000000000000000000))) AND ("sparkora_0"."C_CUSTOMER_SK" = "CS_SHIP_CUSTOMER_SK")) )) AND "CA_STATE" IN ( 'KY', 'GA', 'NM' ))
+group by "CD_GENDER", "CD_MARITAL_STATUS", "CD_EDUCATION_STATUS", "CD_PURCHASE_ESTIMATE", "CD_CREDIT_RATING"
+order by "CD_GENDER" ASC NULLS FIRST, "CD_MARITAL_STATUS" ASC NULLS FIRST, "CD_EDUCATION_STATUS" ASC NULLS FIRST, "CD_PURCHASE_ESTIMATE" ASC NULLS FIRST, "CD_CREDIT_RATING" ASC NULLS FIRST )
+where rownum &lt;= 100
+Pushdown Oracle SQL, Query Splitting details:
+Query is not split
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb90f242" class="outline-3">
+<h3 id="orgb90f242"><span class="section-number-3">4.3</span> Spark SQL Macros</h3>
+<div class="outline-text-3" id="text-4-3">
+</div>
+<div id="outline-container-org3fee407" class="outline-4">
+<h4 id="org3fee407"><span class="section-number-4">4.3.1</span> Defining Macros</h4>
+<div class="outline-text-4" id="text-4-3-1">
+<p>
+The process of defining Spark SQL Macros is almost identical to defining custom functions in
+Spark. So consider a simple function <code>(i : Int) =&gt; i + 2</code>. Following is how you would
+define it as a custom Spark function and as a Spark SQL Macro.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala">spark.udf.register("intUDF", (i: Int) =&gt; {
+       i + 2
+      })
+
+import org.apache.spark.sql.defineMacros._
+spark.registerMacro("intUDM", spark.udm((i: Int) =&gt; {
+   i + 2
+  }))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org1f2ed14" class="outline-4">
+<h4 id="org1f2ed14"><span class="section-number-4">4.3.2</span> Tax and Discount Calculation</h4>
+<div class="outline-text-4" id="text-4-3-2">
+<p>
+Now consider a <b>tax and discount calculation</b> defined as:
+</p>
+<ul class="org-ul">
+<li>no tax on groceries, alcohol is `10.5%`, everything else is `9.5%`</li>
+<li>on Sundays give a discount of `5%` on alcohol.</li>
+</ul>
+
+<p>
+This would be defined using a custom function and Spark SQL macro with the following
+code.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala">/* CUSTOM FUNCTION DEFINITION */
+spark.udf.register("taxAndDiscountF", {(prodCat : String, amt : Double) =&gt;
+    val taxRate = prodCat match {
+      case "grocery" =&gt; 0.0
+      case "alcohol" =&gt; 10.5
+      case _ =&gt; 9.5
+    }
+    val currDate = currentDate(ZoneId.systemDefault())
+    val discount = if (getDayOfWeek(currDate) == 1 &amp;&amp; prodCat == "alcohol") 0.05 else 0.0
+
+    amt * ( 1.0 - discount) * (1.0 + taxRate)
+})
+
+/* SQL MACRO DEFINITION */
+import org.apache.spark.sql.defineMacros._
+import org.apache.spark.sql.sqlmacros.DateTimeUtils._
+import java.time.ZoneId
+spark.registerMacro("taxAndDiscountM", spark.udm({(prodCat : String, amt : Double) =&gt;
+    val taxRate = prodCat match {
+      case "grocery" =&gt; 0.0
+      case "alcohol" =&gt; 10.5
+      case _ =&gt; 9.5
+    }
+    val currDate = currentDate(ZoneId.systemDefault())
+    val discount = if (getDayOfWeek(currDate) == 1 &amp;&amp; prodCat == "alcohol") 0.05 else 0.0
+
+    amt * ( 1.0 - discount) * (1.0 + taxRate)
+}))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orga31ce17" class="outline-4">
+<h4 id="orga31ce17"><span class="section-number-4">4.3.3</span> Query Plan and execution</h4>
+<div class="outline-text-4" id="text-4-3-3">
+<p>
+Now consider a query  on <code>items</code> that invokes the Spark SQL Macro. We show both
+the extended and formatted plans so you can see the logical plan Spark generates
+and what query gets pushed to Oracle.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala">spark.sql(
+  """
+    |explain extended
+    |select i_item_id,
+    |       taxAndDiscountM(I_CATEGORY, I_CURRENT_PRICE) as taxAndDiscount
+    |from item""".stripMargin
+).show(1000, false)
+
+
+spark.sql(
+  """
+    |explain formatted
+    |select i_item_id,
+    |       taxAndDiscountM(I_CATEGORY, I_CURRENT_PRICE) as taxAndDiscount
+    |from item""".stripMargin
+).show(1000, false)
+</pre>
+</div>
+
+<p>
+<b>The plans are:</b>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text">
+OUTPUT OF EXPLAIN EXTENDED:
+
+|== Parsed Logical Plan ==
+'Project ['i_item_id, 'taxAndDiscount('I_CATEGORY, 'I_CURRENT_PRICE) AS taxAndDiscount#1075]
++- 'UnresolvedRelation [item], [], false
+
+== Analyzed Logical Plan ==
+i_item_id: string, taxAndDiscount: double
+Project [i_item_id#1082, ((cast(I_CURRENT_PRICE#1086 as double) * (1.0 - if (((dayofweek(current_date(Some(America/Los_Angeles))) = 1) AND (I_CATEGORY#1093 = alcohol))) 0.05 else 0.0)) * (1.0 + CASE WHEN (I_CATEGORY#1093 = grocery) THEN 0.0 WHEN (I_CATEGORY#1093 = alcohol) THEN 10.5 ELSE 9.5 END)) AS taxAndDiscount#1075]
++- SubqueryAlias oracle.tpcds.item
+   +- RelationV2[I_ITEM_SK#1081, I_ITEM_ID#1082, I_REC_START_DATE#1083, I_REC_END_DATE#1084, I_ITEM_DESC#1085, I_CURRENT_PRICE#1086, I_WHOLESALE_COST#1087, I_BRAND_ID#1088, I_BRAND#1089, I_CLASS_ID#1090, I_CLASS#1091, I_CATEGORY_ID#1092, I_CATEGORY#1093, I_MANUFACT_ID#1094, I_MANUFACT#1095, I_SIZE#1096, I_FORMULATION#1097, I_COLOR#1098, I_UNITS#1099, I_CONTAINER#1100, I_MANAGER_ID#1101, I_PRODUCT_NAME#1102] TPCDS.ITEM
+
+== Optimized Logical Plan ==
+RelationV2[I_ITEM_ID#1082, taxAndDiscount#1075] TPCDS.ITEM
+
+== Physical Plan ==
+*(1) Project [I_ITEM_ID#1082, taxAndDiscount#1075]
++- BatchScan[I_ITEM_ID#1082, taxAndDiscount#1075] class org.apache.spark.sql.connector.read.oracle.OraPushdownScan
+|
+
+OUTPUT OF EXPLAIN FORMATTED:
+
+|== Physical Plan ==
+ Project (2)
++- BatchScan (1)
+
+
+(1) BatchScan
+Output [2]: [I_ITEM_ID#1121, taxAndDiscount#1114]
+OraPlan: 00 OraSingleQueryBlock [I_ITEM_ID#1121, ((cast(I_CURRENT_PRICE#1125 as double) * 1.0) * (1.0 + CASE WHEN (I_CATEGORY#1132 = grocery) THEN 0.0 WHEN (I_CATEGORY#1132 = alcohol) THEN 10.5 ELSE 9.5 END)) AS taxAndDiscount#1114], [oracolumnref(I_ITEM_ID#1121), oraalias(((cast(I_CURRENT_PRICE#1125 as double) * 1.0) * (1.0 + CASE WHEN (I_CATEGORY#1132 = grocery) THEN 0.0 WHEN (I_CATEGORY#1132 = alcohol) THEN 10.5 ELSE 9.5 END)) AS taxAndDiscount#1114)]
+01 +- OraTableScan TPCDS.ITEM, [I_ITEM_ID#1121, I_CURRENT_PRICE#1125, I_CATEGORY#1132]
+ReadSchema: struct&lt;I_ITEM_ID:string,taxAndDiscount:double&gt;
+dsKey: DataSourceKey(jdbc:oracle:thin:@den02ads:1531/cdb1_pdb7.regress.rdbms.dev.us.oracle.com,tpcds)
+oraPushdownSQL: select "I_ITEM_ID", ((cast("I_CURRENT_PRICE" as NUMBER(30, 15)) * 1.0d) * (1.0d + CASE WHEN ("I_CATEGORY" = 'grocery') THEN 0.0d WHEN ("I_CATEGORY" = 'alcohol') THEN 10.5d ELSE 9.5d END)) AS "taxAndDiscount"
+from TPCDS.ITEM
+
+(2) Project [codegen id : 1]
+Output [2]: [I_ITEM_ID#1121, taxAndDiscount#1114]
+Input [2]: [I_ITEM_ID#1121, taxAndDiscount#1114]
+</pre>
+</div>
+
+<p>
+The analyzed catalyst expression for the`taxDiscount` invocation is below. <b>Since it
+ contains no custom function invocation, it is completely pushed to Oracle</b> 
+</p>
+<pre class="example">
+(
+  (cast(I_CURRENT_PRICE#1086 as double) *
+  (1.0 - if (((dayofweek(current_date(Some(America/Los_Angeles))) = 1) AND (I_CATEGORY#1093 = alcohol))) 0.05 else 0.0)) *
+  (1.0 + CASE WHEN (I_CATEGORY#1093 = grocery) THEN 0.0 WHEN (I_CATEGORY#1093 = alcohol) THEN 10.5 ELSE 9.5 END)
+) AS taxAndDiscount#1075
+</pre>
+
+
+<p>
+<b>The generated Oracle SQL is even simpler because it got generated after
+constant folding was applied</b>
+</p>
+<div class="org-src-container">
+<pre class="src src-text">(
+  (cast("I_CURRENT_PRICE" as NUMBER(30, 15)) * 1.0d) *
+  (1.0d + CASE WHEN ("I_CATEGORY" = 'grocery') THEN 0.0d WHEN ("I_CATEGORY" = 'alcohol') THEN 10.5d ELSE 9.5d END)
+) AS "taxAndDiscount"
+</pre>
+</div>
+
+<p>
+<b>Contrast this with the query plan and execution if we had used the custom
+ function instead</b> (you can easily try this on your own): 
+</p>
+<ul class="org-ul">
+<li>the custom function expression wouldn't be pushable to Oracle, so raw column
+values would be pulled out of Oracle.</li>
+<li>Function evaluation in Spark is row by row and would incur
+Serialization/Deserialization cost between catalyst and JVM values.</li>
+<li>The Spark SQL Macro plan would be even more advantageous if the function was
+in the <code>where clause</code></li>
+</ul>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Harish Butani</p>
-<p class="date">Created: 2021-03-19 Fri 21:05</p>
+<p class="date">Created: 2021-03-20 Sat 11:25</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-03-19 Fri 20:11 -->
+<!-- 2021-03-19 Fri 21:05 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Spark on your Oracle Data Warehouse</title>
@@ -180,17 +180,12 @@
   .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
-<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/bigblow_theme/css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/bigblow_theme/css/bigblow.css"/>
-<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/bigblow_theme/css/hideshow.css"/>
-<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery-1.11.0.min.js"></script>
-<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery-ui-1.10.2.min.js"></script>
-<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery.localscroll-min.js"></script>
-<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery.scrollTo-1.4.3.1-min.js"></script>
-<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery.zclip.min.js"></script>
-<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/bigblow.js"></script>
-<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/hideshow.js"></script>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -241,12 +236,45 @@ for the JavaScript code in this tag.
 <body>
 <div id="content">
 <h1 class="title">Spark on your Oracle Data Warehouse</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org900c60e">1. Background and Motivation</a>
+<ul>
+<li><a href="#orga8ebb58">1.1. Reality of these deployments</a></li>
+<li><a href="#org9fad655">1.2. For the Oracle customer</a></li>
+</ul>
+</li>
+<li><a href="#orgd4a6603">2. Our Solution: An integrated platform</a></li>
+<li><a href="#orge799238">3. Summary of Spark Extensions</a>
+<ul>
+<li><a href="#org389a807">3.1. Catalog Integration</a></li>
+<li><a href="#org9488b48">3.2. SQL Translation and Pushdown</a></li>
+<li><a href="#org82226e1">3.3. Language Integration</a>
+<ul>
+<li><a href="#org8601af0">3.3.1. Spark SQL Macros</a></li>
+</ul>
+</li>
+<li><a href="#orgb557cb4">3.4. Runtime Integration</a></li>
+</ul>
+</li>
+<li><a href="#orgf3f4117">4. A Peek under the covers</a>
+<ul>
+<li><a href="#orgfe50251">4.1. Catalog Integration</a></li>
+<li><a href="#orgd3764f2">4.2. TPCDS Queries</a></li>
+<li><a href="#orgf346166">4.3. Spark SQL Macros</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
 
-<div id="outline-container-orgbb9b00b" class="outline-2">
-<h2 id="orgbb9b00b"><span class="section-number-2">1</span> Background and Motivation</h2>
+<div id="outline-container-org900c60e" class="outline-2">
+<h2 id="org900c60e"><span class="section-number-2">1</span> Background and Motivation</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-Figure <a href="#org0f99052">1</a> depicts a not uncommon
+Figure <a href="#org6829f31">1</a> depicts a not uncommon
 deployment for an Enterprise that uses both open source systems and an Oracle Warehouse.
 Enterprises are moving some of their production workloads to open source based
 systems with the current favorite being <a href="https://spark.apache.org/">Apache Spark</a>.
@@ -267,7 +295,7 @@ nowadays to avoid vendor lock in.</li>
 </ul>
 
 
-<div id="org0f99052" class="figure">
+<div id="org6829f31" class="figure">
 <p><img src="./images/entDep.png" alt="entDep.png" width="70%" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Enterprise Data Lake</p>
@@ -281,8 +309,8 @@ Business Intelligence Dashboards and Reports, Financial Planning etc.
 </p>
 </div>
 
-<div id="outline-container-org010f025" class="outline-3">
-<h3 id="org010f025"><span class="section-number-3">1.1</span> Reality of these deployments</h3>
+<div id="outline-container-orga8ebb58" class="outline-3">
+<h3 id="orga8ebb58"><span class="section-number-3">1.1</span> Reality of these deployments</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 Even though open source systems share the storage fabric with the Oracle
@@ -297,7 +325,7 @@ expression mapping issues.
 </p>
 
 
-<div id="org06349ff" class="figure">
+<div id="org3e171ca" class="figure">
 <p><img src="./images/conn.png" alt="conn.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 2: </span>Non-optimal Data movement and Work coordination between systems</p>
@@ -305,8 +333,8 @@ expression mapping issues.
 </div>
 </div>
 
-<div id="outline-container-org1a65a77" class="outline-3">
-<h3 id="org1a65a77"><span class="section-number-3">1.2</span> For the Oracle customer</h3>
+<div id="outline-container-org9fad655" class="outline-3">
+<h3 id="org9fad655"><span class="section-number-3">1.2</span> For the Oracle customer</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 Within the space of multi-system deployments there is a segment of customer whose
@@ -328,7 +356,7 @@ hours&#x2026; larger organizations can save as much as <code>$7.9</code> million
 </ul>
 
 
-<div id="orgb79fc59" class="figure">
+<div id="org58488df" class="figure">
 <p><img src="./images/statusquo.png" alt="statusquo.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 3: </span>Reality: Oracle Customers and Spark</p>
@@ -337,8 +365,8 @@ hours&#x2026; larger organizations can save as much as <code>$7.9</code> million
 </div>
 </div>
 
-<div id="outline-container-org2f016c7" class="outline-2">
-<h2 id="org2f016c7"><span class="section-number-2">2</span> Our Solution: An integrated platform</h2>
+<div id="outline-container-orgd4a6603" class="outline-2">
+<h2 id="orgd4a6603"><span class="section-number-2">2</span> Our Solution: An integrated platform</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 We provide Oracle Customers with a <b>more integrated environment</b> where
@@ -360,7 +388,7 @@ operationally simpler Spark clusters.</b>
 </p>
 
 
-<div id="org11c115f" class="figure">
+<div id="orge39b71e" class="figure">
 <p><img src="./images/spark_on_ora_goals.png" alt="spark_on_ora_goals.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 4: </span>An integrated Oracle and Spark architecture</p>
@@ -397,7 +425,7 @@ be shipped to the Oracle instances for execution.</dd>
 </dl>
 
 
-<div id="org3fc6cf4" class="figure">
+<div id="orgc930509" class="figure">
 <p><img src="./images/spark_on_ora_goals2.png" alt="spark_on_ora_goals2.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 5: </span>Capabilities of an integrated system</p>
@@ -405,12 +433,12 @@ be shipped to the Oracle instances for execution.</dd>
 </div>
 </div>
 
-<div id="outline-container-orgdd5b916" class="outline-2">
-<h2 id="orgdd5b916"><span class="section-number-2">3</span> Summary of Spark Extensions</h2>
+<div id="outline-container-orge799238" class="outline-2">
+<h2 id="orge799238"><span class="section-number-2">3</span> Summary of Spark Extensions</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-org7f98fdb" class="outline-3">
-<h3 id="org7f98fdb"><span class="section-number-3">3.1</span> Catalog Integration</h3>
+<div id="outline-container-org389a807" class="outline-3">
+<h3 id="org389a807"><span class="section-number-3">3.1</span> Catalog Integration</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 We leverage the <a href="https://databricks.com/session/apache-spark-data-source-v2">Catalog Integration and DataSources v2 API</a>
@@ -425,8 +453,8 @@ data consistency model.
 </div>
 </div>
 
-<div id="outline-container-org003c112" class="outline-3">
-<h3 id="org003c112"><span class="section-number-3">3.2</span> SQL Translation and Pushdown</h3>
+<div id="outline-container-org9488b48" class="outline-3">
+<h3 id="org9488b48"><span class="section-number-3">3.2</span> SQL Translation and Pushdown</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 These are based on techniques developed over many years to extend the Spark
@@ -442,11 +470,11 @@ analysis pipelines containing all the analytical functions and operators</b>
 <p>
 For the <a href="http://www.tpc.org/tpcds/">TPCDS benchmark</a> we are able to completely pushed down over 90 of the 99 queries.
 For example following this the non-pushdown vs pushdown plan for TPCDS query
-q1. We provide more details about TPCDS query-set in the <a href="#orgb71140e">TPCDS Queries section</a>.
+q1. We provide more details about TPCDS query-set in the <a href="#orgd3764f2">TPCDS Queries section</a>.
 </p>
 
 
-<div id="orgea5570c" class="figure">
+<div id="orgaba0d12" class="figure">
 <p><img src="./images/tpcds_q1.png" alt="tpcds_q1.png" width="60%" height="60%" />
 </p>
 <p><span class="figure-number">Figure 6: </span>TPCDS Query Q1: non-pushdown vs pushdown plan.</p>
@@ -463,7 +491,7 @@ result.  The query can be split by <b>Input Table(s) partitions or blocks</b> or
 </p>
 
 
-<div id="org56b98a2" class="figure">
+<div id="org08d1eb2" class="figure">
 <p><img src="./images/parallelDataMove.png" alt="parallelDataMove.png" width="60%" />
 </p>
 <p><span class="figure-number">Figure 7: </span>Query Splitting</p>
@@ -480,7 +508,7 @@ on commit.
 </p>
 
 
-<div id="org419900f" class="figure">
+<div id="orgc37f791" class="figure">
 <p><img src="./images/basicInsertFlow.png" alt="basicInsertFlow.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 8: </span>Insert Flow</p>
@@ -488,8 +516,8 @@ on commit.
 </div>
 </div>
 
-<div id="outline-container-orgff84711" class="outline-3">
-<h3 id="orgff84711"><span class="section-number-3">3.3</span> Language Integration</h3>
+<div id="outline-container-org82226e1" class="outline-3">
+<h3 id="org82226e1"><span class="section-number-3">3.3</span> Language Integration</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 We leverage the ability to register of Custom Functions in Spark to enable the
@@ -504,8 +532,8 @@ Spark programming model.
 </p>
 </div>
 
-<div id="outline-container-org32961fa" class="outline-4">
-<h4 id="org32961fa"><span class="section-number-4">3.3.1</span> Spark SQL Macros</h4>
+<div id="outline-container-org8601af0" class="outline-4">
+<h4 id="org8601af0"><span class="section-number-4">3.3.1</span> Spark SQL Macros</h4>
 <div class="outline-text-4" id="text-3-3-1">
 <p>
 Spark provides the ability to register custom functions written in Scala.
@@ -516,7 +544,7 @@ the associated function body.
 </p>
 
 
-<div id="orgb70c0f1" class="figure">
+<div id="orgf3d82c0" class="figure">
 <p><img src="./images/spark_cust_fn.png" alt="spark_cust_fn.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 9: </span>Spark Function Registration and Execution</p>
@@ -541,7 +569,7 @@ presence of these kinds of custom UDFs.*</li>
 </ul>
 
 
-<div id="orge026c99" class="figure">
+<div id="orgf4cdbed" class="figure">
 <p><img src="./images/spark-macro-reg.png" alt="spark-macro-reg.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 10: </span>Spark SQL Macro Registration and Execution</p>
@@ -550,8 +578,8 @@ presence of these kinds of custom UDFs.*</li>
 </div>
 </div>
 
-<div id="outline-container-org98705d1" class="outline-3">
-<h3 id="org98705d1"><span class="section-number-3">3.4</span> Runtime Integration</h3>
+<div id="outline-container-orgb557cb4" class="outline-3">
+<h3 id="orgb557cb4"><span class="section-number-3">3.4</span> Runtime Integration</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 We are investigating the concept of a <b>Spark Co-Processor</b>. A co-processor will
@@ -578,7 +606,7 @@ its definition.
 </p>
 
 
-<div id="org014973a" class="figure">
+<div id="org92cd4d9" class="figure">
 <p><img src="./images/log_tbl_fun.png" alt="log_tbl_fun.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 11: </span>Logical Oracle Plan structure with Table function calls</p>
@@ -588,8 +616,8 @@ its definition.
 </div>
 
 
-<div id="outline-container-org3be9c35" class="outline-2">
-<h2 id="org3be9c35"><span class="section-number-2">4</span> A Peek under the covers</h2>
+<div id="outline-container-orgf3f4117" class="outline-2">
+<h2 id="orgf3f4117"><span class="section-number-2">4</span> A Peek under the covers</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 WE walk through a sample Spark Session of this integrated environment. The
@@ -627,22 +655,46 @@ spark.sql.oracle.querysplit.target=1Mb
 spark.sql.oracle.querysplit.maxfetch.rounds=0.5
 </pre>
 </div>
+
+<p>
+The Spark shell is then started in the normal way, for example in local mode one
+could issue: <code>bin/spark-shell --properties-file spark.oracle.properties --master
+local[*]</code>.
+</p>
 </div>
 
-<div id="outline-container-orgb86c578" class="outline-3">
-<h3 id="orgb86c578"><span class="section-number-3">4.1</span> Catalog Integration</h3>
+<div id="outline-container-orgfe50251" class="outline-3">
+<h3 id="orgfe50251"><span class="section-number-3">4.1</span> Catalog Integration</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+The user can browse the Oracle catalog and describe individual tables:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala">sql("use oracle").show()
+sql("show tables").show(10000, false)
+
+</pre>
 </div>
-<div id="outline-container-orgb71140e" class="outline-3">
-<h3 id="orgb71140e"><span class="section-number-3">4.2</span> TPCDS Queries</h3>
+
+<p>
+Picture for show partitions also
+</p>
 </div>
-<div id="outline-container-orgbc484f2" class="outline-3">
-<h3 id="orgbc484f2"><span class="section-number-3">4.3</span> Spark SQL Macros</h3>
+</div>
+
+<div id="outline-container-orgd3764f2" class="outline-3">
+<h3 id="orgd3764f2"><span class="section-number-3">4.2</span> TPCDS Queries</h3>
+</div>
+
+<div id="outline-container-orgf346166" class="outline-3">
+<h3 id="orgf346166"><span class="section-number-3">4.3</span> Spark SQL Macros</h3>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Harish Butani</p>
-<p class="date">Created: 2021-03-19 Fri 20:11</p>
+<p class="date">Created: 2021-03-19 Fri 21:05</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

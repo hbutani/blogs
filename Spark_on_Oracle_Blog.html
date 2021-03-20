@@ -1,0 +1,649 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-03-19 Fri 20:11 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Spark on your Oracle Data Warehouse</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Harish Butani" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/bigblow_theme/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/bigblow_theme/css/bigblow.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/bigblow_theme/css/hideshow.css"/>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery-ui-1.10.2.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery.localscroll-min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery.scrollTo-1.4.3.1-min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/jquery.zclip.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/bigblow.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/hideshow.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Spark on your Oracle Data Warehouse</h1>
+
+<div id="outline-container-orgbb9b00b" class="outline-2">
+<h2 id="orgbb9b00b"><span class="section-number-2">1</span> Background and Motivation</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Figure <a href="#org0f99052">1</a> depicts a not uncommon
+deployment for an Enterprise that uses both open source systems and an Oracle Warehouse.
+Enterprises are moving some of their production workloads to open source based
+systems with the current favorite being <a href="https://spark.apache.org/">Apache Spark</a>.
+These data platforms typically share a common
+storage fabric, typically an object store like Amazon S3.
+Some of the  motives driving such a move are:
+</p>
+<ul class="org-ul">
+<li>newer Applications utilize capabilities such as machine learning and low-latency ingest;
+open source technologies like <a href="https://spark.apache.org/">Apache Spark</a>, <a href="https://pulsar.apache.org/">Apache Pulsar</a>, <a href="https://www.tensorflow.org/">TensorFlow</a> provide
+deep and fast evolving capabilities in these areas.</li>
+<li>the open source community has done a good job of catering to
+developers/marketing their development model; making it quite easy for very
+small teams to fairly quickly demonstrate point solutions.</li>
+<li>price performance metrics of open source systems when dealing with 'Big Data'
+are  perceived to be superior and also an open source strategy is preferred
+nowadays to avoid vendor lock in.</li>
+</ul>
+
+
+<div id="org0f99052" class="figure">
+<p><img src="./images/entDep.png" alt="entDep.png" width="70%" />
+</p>
+<p><span class="figure-number">Figure 1: </span>Enterprise Data Lake</p>
+</div>
+
+<p>
+The promise is that such a 'Enterprise Data Lake' deployment provides a best of
+both worlds: enabling newer applications to leverage open source stacks without
+disrupting traditional production workloads such as Enterprise Performance,
+Business Intelligence Dashboards and Reports, Financial Planning etc.
+</p>
+</div>
+
+<div id="outline-container-org010f025" class="outline-3">
+<h3 id="org010f025"><span class="section-number-3">1.1</span> Reality of these deployments</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+Even though open source systems share the storage fabric with the Oracle
+warehouse, these systems
+<b>mostly run as silos</b>: each system aspires to be a full-featured data platform for
+their developer communities. Coexistence with other platforms is an after
+thought, and mostly handled with  a <b>'connector' story</b>. Connectors at
+best provide efficient data movement between the systems; in reality connectors
+usually are poorly designed: prove to be pipeline bottlenecks, have data-type
+mapping(not withstanding the promise of <a href="https://arrow.apache.org/">Apache Arrow</a>) and
+expression mapping issues.
+</p>
+
+
+<div id="org06349ff" class="figure">
+<p><img src="./images/conn.png" alt="conn.png" width="90%" />
+</p>
+<p><span class="figure-number">Figure 2: </span>Non-optimal Data movement and Work coordination between systems</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1a65a77" class="outline-3">
+<h3 id="org1a65a77"><span class="section-number-3">1.2</span> For the Oracle customer</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+Within the space of multi-system deployments there is a segment of customer whose
+<b>data platform is centered around an Oracle Data Warehouse</b>, but who still deploys
+some Data Applications using Apache Spark. Such customers are often surprised by
+the significant increase in operational cost of running  Spark and Oracle in
+production:
+</p>
+
+<ul class="org-ul">
+<li>In areas such as Workload management, Query optimization, Data management,
+Data security Oracle customers are surprised by missing capabilities in Spark and how
+much manual labor is needed to compensate for this. They are surprised by the
+investment needed in having to employ a fairly
+big Data Engineering and Platform team for Spark.</li>
+<li>To meet operational SLAs Spark clusters end by being over-provisioned; to quote
+<a href="https://www.datanami.com/2020/07/29/big-data-apps-wasting-billions-in-the-cloud/">Pepperdata</a> "optimization of cloud systems can 'win back' about 50% of task
+hours&#x2026; larger organizations can save as much as <code>$7.9</code> million a year".</li>
+</ul>
+
+
+<div id="orgb79fc59" class="figure">
+<p><img src="./images/statusquo.png" alt="statusquo.png" width="90%" />
+</p>
+<p><span class="figure-number">Figure 3: </span>Reality: Oracle Customers and Spark</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2f016c7" class="outline-2">
+<h2 id="org2f016c7"><span class="section-number-2">2</span> Our Solution: An integrated platform</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+We provide Oracle Customers with a <b>more integrated environment</b> where
+Data management and operational tasks are mostly handled in the Oracle
+Warehouse. At the same time App. developers are abstracted away from the inner workings of the
+platform, given them  more fluidity in the choices of Language and  Functions for their
+Applications. This fits into Oracle's convergence story of consistent data management,
+security, operations across all kinds of data processing tasks. 
+</p>
+
+<p>
+There is no impact on Applications written against the Spark programming
+model. Customers would deploy Spark in the usual ways local-mode, cluster-mode,
+server-less etc; with an additional extension jar provided by oracle and
+instructions on how to configure the Oracle extensions. Since lesser
+amounts of processing needs to be done in Spark, and Oracle is leveraged for
+Administration and Data Management it <b>opens the door to operate smaller and
+operationally simpler Spark clusters.</b>  
+</p>
+
+
+<div id="org11c115f" class="figure">
+<p><img src="./images/spark_on_ora_goals.png" alt="spark_on_ora_goals.png" width="90%" />
+</p>
+<p><span class="figure-number">Figure 4: </span>An integrated Oracle and Spark architecture</p>
+</div>
+
+<p>
+In order to make this happen, we <b>provide the following new capabilities:</b>
+</p>
+<dl class="org-dl">
+<dt>Catalog Integration</dt><dd>The Oracle Data Dictionary will be the source of truth for
+all metadata. We extend the Spark Catalog to be integrated with the Oracle
+Dictionary.</dd>
+<dt>Program Translation and Pushdown</dt><dd>by far this is the <b>most important
+capability</b> that involves
+the translation of Spark SQL into Oracle SQL(and PL-SQL) for pipelines when the
+data is residing/managed in Oracle. This <i>applies to more than raw table
+data</i> stored in Oracle to
+data managed in Oracle via  such things as <a href="https://docs.oracle.com/en/database/oracle/oracle-database/21/dwhsg/basic-materialized-views.html#GUID-A7AE8E5D-68A5-4519-81EB-252EAAF0ADFF">Materialized Views</a>,  <a href="https://docs.oracle.com/en/database/oracle/oracle-database/21/dwhsg/part-analytic-views.html#GUID-AC5ACD4F-69F3-4C32-B7A1-EABF93639BEC">Analytic
+Views</a> and <a href="https://docs.oracle.com/en/database/oracle/oracle-database/21/inmem/index.html">In-Memory Option</a>. <b>Pushing
+the processing to where the data is even for complex data pipelines provides</b>
+<b>the biggest differentiation from 'connector' architectures.</b></dd>
+<dt>Language Integration</dt><dd>Language Integration encompasses capabilities that
+extend Apache Spark such that on the one hand <b>native Oracle functions and
+data structures</b> are usable in Spark programs and on the other hand the
+translation of <b>a subset of custom scala programs into equivalent oracle
+sql/pl-sql</b> so that larger parts of Spark pipelines are pushed down to the
+Oracle DB for processing.</dd>
+<dt>Runtime Integration</dt><dd>Even with Pushdown and Language Integration there are
+many pipelines that will contain Spark specific program code; this would
+trigger large amounts of data to be streamed out of Oracle to
+Spark executors. A <b>Spark co-processor</b> either co-located with Oracle
+instances  or embedded in them would allow for limited Spark pipelines to
+be shipped to the Oracle instances for execution.</dd>
+</dl>
+
+
+<div id="org3fc6cf4" class="figure">
+<p><img src="./images/spark_on_ora_goals2.png" alt="spark_on_ora_goals2.png" width="90%" />
+</p>
+<p><span class="figure-number">Figure 5: </span>Capabilities of an integrated system</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdd5b916" class="outline-2">
+<h2 id="orgdd5b916"><span class="section-number-2">3</span> Summary of Spark Extensions</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org7f98fdb" class="outline-3">
+<h3 id="org7f98fdb"><span class="section-number-3">3.1</span> Catalog Integration</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+We leverage the <a href="https://databricks.com/session/apache-spark-data-source-v2">Catalog Integration and DataSources v2 API</a>
+in Apache Spark 3.0 to provide a custom plug-in Catalog in Spark  that
+integrates with the Oracle Database Data Dictionary.  A common catalog implies all
+persistent data, including data residing  in an Object Store is
+represented in the Oracle Data Dictionary. So both systems
+have a common view of the Data Warehouse, a common and
+consistent enforcement of of role and data based security, a common metadata and
+data consistency model.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org003c112" class="outline-3">
+<h3 id="org003c112"><span class="section-number-3">3.2</span> SQL Translation and Pushdown</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+These are based on techniques developed over many years to extend the Spark
+Planner with custom Query Optimizations. See <a href="https://github.com/SparklineData/spark-druid-olap">Spark Druid OLAP</a> and
+<a href="https://medium.com/@rhbutani/https-medium-com-oracle-snap-benefits-of-bi-semantics-in-spark-sql-a-view-through-the-tpcds-benchmark-5cca8d6d25d2">Sparklinedata BI Stack on Spark</a>. From the early days it has been possible to
+extend Spark's  Logical and Physical planners. By rewriting Spark Plans we can
+go way beyond what most Spark 'connectors' provide(that is  pushing projections
+and filters to the underlying system); <b>We are able to entirely push  complex
+analysis pipelines containing all the analytical functions and operators</b>
+<b>of Spark SQL.</b> 
+</p>
+
+<p>
+For the <a href="http://www.tpc.org/tpcds/">TPCDS benchmark</a> we are able to completely pushed down over 90 of the 99 queries.
+For example following this the non-pushdown vs pushdown plan for TPCDS query
+q1. We provide more details about TPCDS query-set in the <a href="#orgb71140e">TPCDS Queries section</a>.
+</p>
+
+
+<div id="orgea5570c" class="figure">
+<p><img src="./images/tpcds_q1.png" alt="tpcds_q1.png" width="60%" height="60%" />
+</p>
+<p><span class="figure-number">Figure 6: </span>TPCDS Query Q1: non-pushdown vs pushdown plan.</p>
+</div>
+
+
+<p>
+When a pushdown query returns a lot of data, the single pipe between the Spark task and the
+database instance could become a bottleneck of query execution. The <b>Query
+Splitting</b> feature attempts to split an oracle pushdown query into a set of
+queries such that the union-all of the results is the same as the original query
+result.  The query can be split by <b>Input Table(s) partitions or blocks</b> or by the
+<b>outputResult-Set row ranges.</b>
+</p>
+
+
+<div id="org56b98a2" class="figure">
+<p><img src="./images/parallelDataMove.png" alt="parallelDataMove.png" width="60%" />
+</p>
+<p><span class="figure-number">Figure 7: </span>Query Splitting</p>
+</div>
+
+<p>
+For DML operations we integrate into <a href="https://databricks.com/session/apache-spark-data-source-v2">Spark's Datasources v2</a> API to provide
+transactionally consistent DML: during spark job execution, all other jobs will
+see the state of the table as of the start of the job and we don't have to prevent
+concurrent dml jobs on a table. On success, the destination table will  be in a
+state that matches some serialization of the jobs. Under the covers data is first
+written to Temp. tables in Oracle before being merged into the destination table
+on commit.
+</p>
+
+
+<div id="org419900f" class="figure">
+<p><img src="./images/basicInsertFlow.png" alt="basicInsertFlow.png" width="90%" />
+</p>
+<p><span class="figure-number">Figure 8: </span>Insert Flow</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgff84711" class="outline-3">
+<h3 id="orgff84711"><span class="section-number-3">3.3</span> Language Integration</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+We leverage the ability to register of Custom Functions in Spark to enable the
+registration of  Oracle SQL functions into Spark. These functions can then be
+used in Spark-SQL on Oracle tables. Our Planner extensions translate these into
+equivalent Oracle SQL for execution. 
+</p>
+
+<p>
+We are investigating surfacing Oracle ML and Geo-spatial capabilities into the
+Spark programming model. 
+</p>
+</div>
+
+<div id="outline-container-org32961fa" class="outline-4">
+<h4 id="org32961fa"><span class="section-number-4">3.3.1</span> Spark SQL Macros</h4>
+<div class="outline-text-4" id="text-3-3-1">
+<p>
+Spark provides the ability to register custom functions written in Scala.
+Under the covers an <code>Invoke Catalyst Expression</code> is associated with the function
+name in Spark's <code>Function Registry</code>. These functions are usable in Spark-SQL
+just like built-in functions. At runtime an Invoke Catalyst Expression runs
+the associated function body.
+</p>
+
+
+<div id="orgb70c0f1" class="figure">
+<p><img src="./images/spark_cust_fn.png" alt="spark_cust_fn.png" width="90%" />
+</p>
+<p><span class="figure-number">Figure 9: </span>Spark Function Registration and Execution</p>
+</div>
+
+<p>
+We have developed the <b>Spark SQL Macros</b> capability that provides the ability to register
+custom scala functions into a Spark Session just like the custom UDF
+Registration capability of Spark. The difference being that the <b>SQL Macros
+registration mechanism attempts to translate the function body to an equivalent</b>
+<b>Spark catalyst Expression</b> with holes(MarcroArg catalyst expressions). Under
+the covers SQLMacro is a <b>set of scala blackbox macros</b> that attempt to rewrite
+the scala function body AST into an equivalent catalyst Expression. There are
+2 big benefits of doing this:
+</p>
+<ul class="org-ul">
+<li>better performance. Since we avoid the SerDe cost at the function boundary.</li>
+<li>Since the physical plan has native catalyst expressions more optimizations are possible.
+In the case of Oracle pushdown *we are able to pushdown the catalyst
+expressions to Oracle SQL, avoiding streaming data out of Oracle even in the
+presence of these kinds of custom UDFs.*</li>
+</ul>
+
+
+<div id="orge026c99" class="figure">
+<p><img src="./images/spark-macro-reg.png" alt="spark-macro-reg.png" width="90%" />
+</p>
+<p><span class="figure-number">Figure 10: </span>Spark SQL Macro Registration and Execution</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org98705d1" class="outline-3">
+<h3 id="org98705d1"><span class="section-number-3">3.4</span> Runtime Integration</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+We are investigating the concept of a <b>Spark Co-Processor</b>. A co-processor will
+be a <i>very limited and isolated Spark environments</i> whose only capability is to be
+able to run a given  Spark operator pipeline in a single Task, so the Pipeline
+cannot contain Shuffle operations. Co-processors are unaware of cluster topology
+or the data dictionary.  They are dumb processing units for running custom scala code that
+apply row/block transformations. A Co-Processor could be an isolated process
+co-located with Oracle Instance processes or it could be embedded inside Oracle
+processes along the lines of <a href="https://medium.com/graalvm/bringing-modern-programming-languages-to-the-oracle-database-with-graalvm-80914d0c0167">how a javascript engine is embedded inside an
+Oracle process</a>.
+</p>
+
+<p>
+Logically a Spark Plan will get translated into Oracle SQL
+query blocks connected by calls to a Partitioned Table function. At runtime,
+this function will be the bridge to the co-processor in
+the Oracle Operator pipeline. Each Table function invocation will stream its
+input partition to and from the co-processor; it will coordinate setting up and
+shutting down the Spark pipeline and executing the pipeline on data chunks. Data
+Parallelism between Oracle and Spark will be controlled by using Pipelined
+Parallel Table Function mechanics specifically Order By/Cluster By clauses in
+its definition.
+</p>
+
+
+<div id="org014973a" class="figure">
+<p><img src="./images/log_tbl_fun.png" alt="log_tbl_fun.png" width="90%" />
+</p>
+<p><span class="figure-number">Figure 11: </span>Logical Oracle Plan structure with Table function calls</p>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org3be9c35" class="outline-2">
+<h2 id="org3be9c35"><span class="section-number-2">4</span> A Peek under the covers</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+WE walk through a sample Spark Session of this integrated environment. The
+Oracle Instance is loaded with the <a href="http://www.tpc.org/tpcds/">TPCDS dataset</a> and we connect to it via a
+<i>Spark Shell</i> session. The Spark Configuration has settings for this integrated
+environment such as connection information and query pushdown instructions.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text"># Oracle Catalog
+
+# enable Spark Oracle extensions
+spark.sql.extensions=org.apache.spark.sql.oracle.SparkSessionExtensions
+spark.kryo.registrator=org.apache.spark.sql.connector.catalog.oracle.OraKryoRegistrator
+
+# enable the Oracle Catalog integration
+spark.sql.catalog.oracle=org.apache.spark.sql.connector.catalog.oracle.OracleCatalog
+
+# oracle instance connection information
+spark.sql.catalog.oracle.url=jdbc:oracle:thin:@slcaa334:1531/cdb1_pdb7.regress.rdbms.dev.us.oracle.com
+spark.sql.catalog.oracle.user=tpcds
+spark.sql.catalog.oracle.password=...
+
+# oracle sql logging and jdbc fetchsize
+spark.sql.catalog.oracle.log_and_time_sql.enabled=true
+spark.sql.catalog.oracle.log_and_time_sql.log_level=info
+spark.sql.catalog.oracle.fetchSize=5000
+
+# Query pushdown
+spark.sql.oracle.enable.pushdown=true
+
+# Parallelize data movement.
+spark.sql.oracle.enable.querysplitting=true
+spark.sql.oracle.querysplit.target=1Mb
+spark.sql.oracle.querysplit.maxfetch.rounds=0.5
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgb86c578" class="outline-3">
+<h3 id="orgb86c578"><span class="section-number-3">4.1</span> Catalog Integration</h3>
+</div>
+<div id="outline-container-orgb71140e" class="outline-3">
+<h3 id="orgb71140e"><span class="section-number-3">4.2</span> TPCDS Queries</h3>
+</div>
+<div id="outline-container-orgbc484f2" class="outline-3">
+<h3 id="orgbc484f2"><span class="section-number-3">4.3</span> Spark SQL Macros</h3>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Harish Butani</p>
+<p class="date">Created: 2021-03-19 Fri 20:11</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

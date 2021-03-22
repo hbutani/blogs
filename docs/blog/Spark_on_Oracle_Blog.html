@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-03-20 Sat 11:25 -->
+<!-- 2021-03-22 Mon 11:13 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Spark on your Oracle Data Warehouse</title>
@@ -191,6 +191,7 @@
 <script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/bigblow.js"></script>
 <script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/bigblow_theme/js/hideshow.js"></script>
 <script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+<style> #content{max-width:1000px;}</style>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -245,39 +246,40 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org654389f">1. Background and Motivation</a>
+<li><a href="#org1e2dab8">1. Background and Motivation</a>
 <ul>
-<li><a href="#org9640387">1.1. Reality of these deployments</a></li>
-<li><a href="#org565e5a5">1.2. For the Oracle customer</a></li>
+<li><a href="#org74d606a">1.1. Reality of these deployments</a></li>
+<li><a href="#orgc09060d">1.2. For the Oracle customer</a></li>
 </ul>
 </li>
-<li><a href="#org039fa37">2. Our Solution: An integrated platform</a></li>
-<li><a href="#orgcb63988">3. Summary of Spark Extensions</a>
+<li><a href="#org2f9a807">2. Our Solution: An integrated platform</a></li>
+<li><a href="#org329bab6">3. Summary of Spark Extensions</a>
 <ul>
-<li><a href="#orgb4adbcb">3.1. Catalog Integration</a></li>
-<li><a href="#org5c0a107">3.2. SQL Translation and Pushdown</a></li>
-<li><a href="#org8827de4">3.3. Language Integration</a>
+<li><a href="#org714e928">3.1. Catalog Integration</a></li>
+<li><a href="#orgae30996">3.2. SQL Translation and Pushdown</a></li>
+<li><a href="#orgd07e36b">3.3. Language Integration</a>
 <ul>
-<li><a href="#orgb894ff5">3.3.1. Spark SQL Macros</a></li>
+<li><a href="#org1388a2a">3.3.1. Spark SQL Macros</a></li>
 </ul>
 </li>
-<li><a href="#org0359bbb">3.4. Runtime Integration</a></li>
+<li><a href="#org028edd1">3.4. Runtime Integration</a></li>
 </ul>
 </li>
-<li><a href="#orgec37ca1">4. A Peek under the covers</a>
+<li><a href="#orgae5ed01">4. A Peek under the covers</a>
 <ul>
-<li><a href="#org48d9157">4.1. Catalog Integration</a></li>
-<li><a href="#orgf089ba3">4.2. TPCDS Queries</a>
+<li><a href="#org49100fd">4.1. Catalog Integration</a></li>
+<li><a href="#orgd1c2a28">4.2. TPCDS Queries</a>
 <ul>
-<li><a href="#orgfa8c87b">4.2.1. Q1</a></li>
-<li><a href="#org099b359">4.2.2. Pushdown plan for Q5, Q69</a></li>
+<li><a href="#org3299193">4.2.1. Q1</a></li>
+<li><a href="#org2fbafc0">4.2.2. Pushdown plan for Q5, Q69</a></li>
 </ul>
 </li>
-<li><a href="#orgb90f242">4.3. Spark SQL Macros</a>
+<li><a href="#org10eb9a1">4.3. Registration and Use of Oracle Functions(Row and Aggregate) in Spark SQL</a></li>
+<li><a href="#orgb4ea522">4.4. Spark SQL Macros</a>
 <ul>
-<li><a href="#org3fee407">4.3.1. Defining Macros</a></li>
-<li><a href="#org1f2ed14">4.3.2. Tax and Discount Calculation</a></li>
-<li><a href="#orga31ce17">4.3.3. Query Plan and execution</a></li>
+<li><a href="#org74f9b15">4.4.1. Defining Macros</a></li>
+<li><a href="#orgb8ef255">4.4.2. Tax and Discount Calculation</a></li>
+<li><a href="#orgd80594a">4.4.3. Query Plan and execution</a></li>
 </ul>
 </li>
 </ul>
@@ -286,15 +288,15 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-org654389f" class="outline-2">
-<h2 id="org654389f"><span class="section-number-2">1</span> Background and Motivation</h2>
+<div id="outline-container-org1e2dab8" class="outline-2">
+<h2 id="org1e2dab8"><span class="section-number-2">1</span> Background and Motivation</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-Figure <a href="#orgb902eca">1</a> depicts a not uncommon
+Figure <a href="#org67d9a2f">1</a> depicts a not uncommon
 deployment for an Enterprise that uses both open source systems and an Oracle Warehouse.
-Enterprises are moving some of their production workloads to open source based
-systems with the current favorite being <a href="https://spark.apache.org/">Apache Spark</a>.
-These data platforms typically share a common
+Enterprises are deploying some of their production workloads on open source technologies
+ with the current favorite being <a href="https://spark.apache.org/">Apache Spark</a>.
+The Oracle Warehouse and open source systems typically share a common
 storage fabric, typically an object store like Amazon S3.
 Some of the  motives driving such a move are:
 </p>
@@ -303,45 +305,46 @@ Some of the  motives driving such a move are:
 open source technologies like <a href="https://spark.apache.org/">Apache Spark</a>, <a href="https://pulsar.apache.org/">Apache Pulsar</a>, <a href="https://www.tensorflow.org/">TensorFlow</a> provide
 deep and fast evolving capabilities in these areas.</li>
 <li>the open source community has done a good job of catering to
-developers/marketing their development model; making it quite easy for very
-small teams to fairly quickly demonstrate point solutions.</li>
+developers; making it quite easy for
+small teams to fairly quickly develop and deploy point solutions.</li>
 <li>price performance metrics of open source systems when dealing with 'Big Data'
-are  perceived to be superior and also an open source strategy is preferred
+are  perceived to be superior and an open source strategy is preferred
 nowadays to avoid vendor lock in.</li>
 </ul>
 
 
-<div id="orgb902eca" class="figure">
+<div id="org67d9a2f" class="figure">
 <p><img src="./images/entDep.png" alt="entDep.png" width="70%" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Enterprise Data Lake</p>
 </div>
 
 <p>
-The promise is that such a 'Enterprise Data Lake' deployment provides a best of
-both worlds: enabling newer applications to leverage open source stacks without
+The promise of such a 'Enterprise Data Lake' deployment is that it provides a <b>best of
+both worlds:</b> enabling newer applications to leverage open source stacks without
 disrupting traditional production workloads such as Enterprise Performance,
 Business Intelligence Dashboards and Reports, Financial Planning etc.
 </p>
 </div>
 
-<div id="outline-container-org9640387" class="outline-3">
-<h3 id="org9640387"><span class="section-number-3">1.1</span> Reality of these deployments</h3>
+<div id="outline-container-org74d606a" class="outline-3">
+<h3 id="org74d606a"><span class="section-number-3">1.1</span> Reality of these deployments</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 Even though open source systems share the storage fabric with the Oracle
 warehouse, these systems
 <b>mostly run as silos</b>: each system aspires to be a full-featured data platform for
 their developer communities. Coexistence with other platforms is an after
-thought, and mostly handled with  a <b>'connector' story</b>. Connectors at
-best provide efficient data movement between the systems; in reality connectors
-usually are poorly designed: prove to be pipeline bottlenecks, have data-type
-mapping(not withstanding the promise of <a href="https://arrow.apache.org/">Apache Arrow</a>) and
-expression mapping issues.
+thought, and mostly handled with  a <b>'connector' story</b>. Connectors at best help
+reduce data movement between the systems; even this claim has holes and in reality many problems are
+left unsolved such as coordination and scheduling of tasks across these systems,
+co-location of runtime resources, efficient data value mapping(not withstanding the promise of <a href="https://arrow.apache.org/">Apache Arrow</a>),
+and deep translation and pushdown of SQL.
 </p>
 
 
-<div id="org6e98667" class="figure">
+
+<div id="org750b5c2" class="figure">
 <p><img src="./images/conn.png" alt="conn.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 2: </span>Non-optimal Data movement and Work coordination between systems</p>
@@ -349,14 +352,14 @@ expression mapping issues.
 </div>
 </div>
 
-<div id="outline-container-org565e5a5" class="outline-3">
-<h3 id="org565e5a5"><span class="section-number-3">1.2</span> For the Oracle customer</h3>
+<div id="outline-container-orgc09060d" class="outline-3">
+<h3 id="orgc09060d"><span class="section-number-3">1.2</span> For the Oracle customer</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 Within the space of multi-system deployments there is a segment of customer whose
 <b>data platform is centered around an Oracle Data Warehouse</b>, but who still deploys
 some Data Applications using Apache Spark. Such customers are often surprised by
-the significant increase in operational cost of running  Spark and Oracle in
+the <b>significant increase in operational cost of running  Spark and Oracle</b> in
 production:
 </p>
 
@@ -372,7 +375,7 @@ hours&#x2026; larger organizations can save as much as <code>$7.9</code> million
 </ul>
 
 
-<div id="orgacc2f89" class="figure">
+<div id="org2c0b938" class="figure">
 <p><img src="./images/statusquo.png" alt="statusquo.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 3: </span>Reality: Oracle Customers and Spark</p>
@@ -381,8 +384,8 @@ hours&#x2026; larger organizations can save as much as <code>$7.9</code> million
 </div>
 </div>
 
-<div id="outline-container-org039fa37" class="outline-2">
-<h2 id="org039fa37"><span class="section-number-2">2</span> Our Solution: An integrated platform</h2>
+<div id="outline-container-org2f9a807" class="outline-2">
+<h2 id="org2f9a807"><span class="section-number-2">2</span> Our Solution: An integrated platform</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 We provide Oracle Customers with a <b>more integrated environment</b> where
@@ -394,8 +397,8 @@ security, operations across all kinds of data processing tasks.
 </p>
 
 <p>
-There is no impact on Applications written against the Spark programming
-model. Customers would deploy Spark in the usual ways local-mode, cluster-mode,
+There is <b>no impact on Applications written against the Spark programming
+model.</b> Customers would <b>deploy Spark in the usual ways</b>: local-mode, cluster-mode,
 server-less etc; with an additional extension jar provided by oracle and
 instructions on how to configure the Oracle extensions. Since lesser
 amounts of processing needs to be done in Spark, and Oracle is leveraged for
@@ -404,7 +407,7 @@ operationally simpler Spark clusters.</b>
 </p>
 
 
-<div id="org444069d" class="figure">
+<div id="org0a84c45" class="figure">
 <p><img src="./images/spark_on_ora_goals.png" alt="spark_on_ora_goals.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 4: </span>An integrated Oracle and Spark architecture</p>
@@ -424,13 +427,13 @@ data is residing/managed in Oracle. This <i>applies to more than raw table
 data</i> stored in Oracle to
 data managed in Oracle via  such things as <a href="https://docs.oracle.com/en/database/oracle/oracle-database/21/dwhsg/basic-materialized-views.html#GUID-A7AE8E5D-68A5-4519-81EB-252EAAF0ADFF">Materialized Views</a>,  <a href="https://docs.oracle.com/en/database/oracle/oracle-database/21/dwhsg/part-analytic-views.html#GUID-AC5ACD4F-69F3-4C32-B7A1-EABF93639BEC">Analytic
 Views</a> and <a href="https://docs.oracle.com/en/database/oracle/oracle-database/21/inmem/index.html">In-Memory Option</a>. <b>Pushing
-the processing to where the data is even for complex data pipelines provides</b>
+the processing to where the data is, even for complex data pipelines provides</b>
 <b>the biggest differentiation from 'connector' architectures.</b></dd>
 <dt>Language Integration</dt><dd>Language Integration encompasses capabilities that
 extend Apache Spark such that on the one hand <b>native Oracle functions and
 data structures</b> are usable in Spark programs and on the other hand the
 translation of <b>a subset of custom scala programs into equivalent oracle
-sql/pl-sql</b> so that larger parts of Spark pipelines are pushed down to the
+sql/pl-sql</b>, so that larger parts of Spark pipelines are pushed down to the
 Oracle DB for processing.</dd>
 <dt>Runtime Integration</dt><dd>Even with Pushdown and Language Integration there are
 many pipelines that will contain Spark specific program code; this would
@@ -441,36 +444,36 @@ be shipped to the Oracle instances for execution.</dd>
 </dl>
 
 
-<div id="org061e548" class="figure">
-<p><img src="./images/spark_on_ora_goals2.png" alt="spark_on_ora_goals2.png" width="90%" />
+<div id="org2b4d585" class="figure">
+<p><img src="./images/spark_on_ora_goals2.png" alt="spark_on_ora_goals2.png" width="70%" />
 </p>
 <p><span class="figure-number">Figure 5: </span>Capabilities of an integrated system</p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgcb63988" class="outline-2">
-<h2 id="orgcb63988"><span class="section-number-2">3</span> Summary of Spark Extensions</h2>
+<div id="outline-container-org329bab6" class="outline-2">
+<h2 id="org329bab6"><span class="section-number-2">3</span> Summary of Spark Extensions</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-orgb4adbcb" class="outline-3">
-<h3 id="orgb4adbcb"><span class="section-number-3">3.1</span> Catalog Integration</h3>
+<div id="outline-container-org714e928" class="outline-3">
+<h3 id="org714e928"><span class="section-number-3">3.1</span> Catalog Integration</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 We leverage the <a href="https://databricks.com/session/apache-spark-data-source-v2">Catalog Integration and DataSources v2 API</a>
-in Apache Spark 3.0 to provide a custom plug-in Catalog in Spark  that
+in Apache Spark 3.0 to provide a custom plug-in Catalog that
 integrates with the Oracle Database Data Dictionary.  A common catalog implies all
 persistent data, including data residing  in an Object Store is
-represented in the Oracle Data Dictionary. So both systems
-have a common view of the Data Warehouse, a common and
-consistent enforcement of of role and data based security, a common metadata and
-data consistency model.
+represented in the Oracle Data Dictionary. Hence both systems
+have a consistent view of the Data Warehouse; a common and
+consistent enforcement of role and data based security, a common metadata and
+data consistency model can be applied.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org5c0a107" class="outline-3">
-<h3 id="org5c0a107"><span class="section-number-3">3.2</span> SQL Translation and Pushdown</h3>
+<div id="outline-container-orgae30996" class="outline-3">
+<h3 id="orgae30996"><span class="section-number-3">3.2</span> SQL Translation and Pushdown</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 These are based on techniques developed over many years to extend the Spark
@@ -484,13 +487,13 @@ analysis pipelines containing all the analytical functions and operators</b>
 </p>
 
 <p>
-For the <a href="http://www.tpc.org/tpcds/">TPCDS benchmark</a> we are able to completely pushed down over 90 of the 99 queries.
-For example following this the non-pushdown vs pushdown plan for TPCDS query
-q1. We provide more details about TPCDS query-set in the <a href="#orgf089ba3">TPCDS Queries section</a>.
+<b>For the <a href="http://www.tpc.org/tpcds/">TPCDS benchmark</a> we are able to completely pushed down over 90 of the 99 queries.</b>
+For example Figure  <a href="#org2ab2435">6</a> shows the non-pushdown vs pushdown plan for TPCDS query
+q1. We provide more details about TPCDS queries in the <a href="#orgd1c2a28">TPCDS Queries section</a>.
 </p>
 
 
-<div id="orgfadf9e4" class="figure">
+<div id="org2ab2435" class="figure">
 <p><img src="./images/tpcds_q1.png" alt="tpcds_q1.png" width="60%" height="60%" />
 </p>
 <p><span class="figure-number">Figure 6: </span>TPCDS Query Q1: non-pushdown vs pushdown plan.</p>
@@ -498,16 +501,16 @@ q1. We provide more details about TPCDS query-set in the <a href="#orgf089ba3">T
 
 
 <p>
-When a pushdown query returns a lot of data, the single pipe between the Spark task and the
+When a pushdown query returns a lot of data, the single pipe between a Spark task and the
 database instance could become a bottleneck of query execution. The <b>Query
 Splitting</b> feature attempts to split an oracle pushdown query into a set of
 queries such that the union-all of the results is the same as the original query
-result.  The query can be split by <b>Input Table(s) partitions or blocks</b> or by the
-<b>outputResult-Set row ranges.</b>
+result.  The query can be split by <b>Input Table(s) partitions or blocks</b> or by
+<b>output Result-Set row ranges.</b>
 </p>
 
 
-<div id="org79eb2c2" class="figure">
+<div id="orge3a8a93" class="figure">
 <p><img src="./images/parallelDataMove.png" alt="parallelDataMove.png" width="60%" />
 </p>
 <p><span class="figure-number">Figure 7: </span>Query Splitting</p>
@@ -524,7 +527,7 @@ on commit.
 </p>
 
 
-<div id="org7951fe7" class="figure">
+<div id="org07b97e5" class="figure">
 <p><img src="./images/basicInsertFlow.png" alt="basicInsertFlow.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 8: </span>Insert Flow</p>
@@ -532,8 +535,8 @@ on commit.
 </div>
 </div>
 
-<div id="outline-container-org8827de4" class="outline-3">
-<h3 id="org8827de4"><span class="section-number-3">3.3</span> Language Integration</h3>
+<div id="outline-container-orgd07e36b" class="outline-3">
+<h3 id="orgd07e36b"><span class="section-number-3">3.3</span> Language Integration</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 We leverage the ability to register of Custom Functions in Spark to enable the
@@ -543,13 +546,13 @@ equivalent Oracle SQL for execution.
 </p>
 
 <p>
-We are investigating surfacing Oracle ML and Geo-spatial capabilities into the
+We are also investigating surfacing Oracle ML and Geo-spatial capabilities into the
 Spark programming model. 
 </p>
 </div>
 
-<div id="outline-container-orgb894ff5" class="outline-4">
-<h4 id="orgb894ff5"><span class="section-number-4">3.3.1</span> Spark SQL Macros</h4>
+<div id="outline-container-org1388a2a" class="outline-4">
+<h4 id="org1388a2a"><span class="section-number-4">3.3.1</span> Spark SQL Macros</h4>
 <div class="outline-text-4" id="text-3-3-1">
 <p>
 Spark provides the ability to register custom functions written in Scala.
@@ -560,7 +563,7 @@ the associated function body.
 </p>
 
 
-<div id="orgb0fbb06" class="figure">
+<div id="org9300ed2" class="figure">
 <p><img src="./images/spark_cust_fn.png" alt="spark_cust_fn.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 9: </span>Spark Function Registration and Execution</p>
@@ -572,20 +575,20 @@ custom scala functions into a Spark Session just like the custom UDF
 Registration capability of Spark. The difference being that the <b>SQL Macros
 registration mechanism attempts to translate the function body to an equivalent</b>
 <b>Spark catalyst Expression</b> with holes(MarcroArg catalyst expressions). Under
-the covers SQLMacro is a <b>set of scala blackbox macros</b> that attempt to rewrite
+the covers SQLMacro is a <a href="https://docs.scala-lang.org/overviews/macros/overview.html">set of scala blackbox macros</a> that attempt to rewrite
 the scala function body AST into an equivalent catalyst Expression. There are
 2 big benefits of doing this:
 </p>
 <ul class="org-ul">
-<li>better performance. Since we avoid the SerDe cost at the function boundary.</li>
+<li>better performance. Since at runtime we avoid the SerDe cost at the function boundary.</li>
 <li>Since the physical plan has native catalyst expressions more optimizations are possible.
-In the case of Oracle pushdown *we are able to pushdown the catalyst
-expressions to Oracle SQL, avoiding streaming data out of Oracle even in the
-presence of these kinds of custom UDFs.*</li>
+In the case of Oracle pushdown <b>we are able to pushdown the catalyst
+expressions to Oracle SQL, avoiding streaming data out of Oracle even in the</b>
+<b>presence of these kinds of custom UDFs.</b></li>
 </ul>
 
 
-<div id="org7f63e23" class="figure">
+<div id="org6e961cd" class="figure">
 <p><img src="./images/spark-macro-reg.png" alt="spark-macro-reg.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 10: </span>Spark SQL Macro Registration and Execution</p>
@@ -594,18 +597,18 @@ presence of these kinds of custom UDFs.*</li>
 </div>
 </div>
 
-<div id="outline-container-org0359bbb" class="outline-3">
-<h3 id="org0359bbb"><span class="section-number-3">3.4</span> Runtime Integration</h3>
+<div id="outline-container-org028edd1" class="outline-3">
+<h3 id="org028edd1"><span class="section-number-3">3.4</span> Runtime Integration</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 We are investigating the concept of a <b>Spark Co-Processor</b>. A co-processor will
-be a <i>very limited and isolated Spark environments</i> whose only capability is to be
-able to run a given  Spark operator pipeline in a single Task, so the Pipeline
-cannot contain Shuffle operations. Co-processors are unaware of cluster topology
+be a <i>very limited and isolated Spark environment</i> whose only capability is to
+run a given  Spark operator pipeline in a single Task(the Pipeline 
+cannot contain Shuffle operations). Co-processors are unaware of cluster topology
 or the data dictionary.  They are dumb processing units for running custom scala code that
-apply row/block transformations. A Co-Processor could be an isolated process
-co-located with Oracle Instance processes or it could be embedded inside Oracle
-processes along the lines of <a href="https://medium.com/graalvm/bringing-modern-programming-languages-to-the-oracle-database-with-graalvm-80914d0c0167">how a javascript engine is embedded inside an
+apply row/row-group transformations. A Co-Processor could be an isolated process
+co-located with Oracle Instance processes or it could be embedded inside an Oracle
+process along the lines of <a href="https://medium.com/graalvm/bringing-modern-programming-languages-to-the-oracle-database-with-graalvm-80914d0c0167">how a javascript engine is embedded inside an
 Oracle process</a>.
 </p>
 
@@ -616,13 +619,13 @@ this function will be the bridge to the co-processor in
 the Oracle Operator pipeline. Each Table function invocation will stream its
 input partition to and from the co-processor; it will coordinate setting up and
 shutting down the Spark pipeline and executing the pipeline on data chunks. Data
-Parallelism between Oracle and Spark will be controlled by using Pipelined
-Parallel Table Function mechanics specifically Order By/Cluster By clauses in
+Parallelism between Oracle and Spark will be controlled by using <a href="https://docs.oracle.com/en/database/oracle/oracle-database/19/addci/using-pipelined-and-parallel-table-functions.html#GUID-EFB94CFB-3E44-4236-B490-ADBB480C94D4">Pipelined
+Parallel Table Function</a> mechanics specifically Order By/Cluster By clauses in
 its definition.
 </p>
 
 
-<div id="orge7a29e2" class="figure">
+<div id="org7ac762e" class="figure">
 <p><img src="./images/log_tbl_fun.png" alt="log_tbl_fun.png" width="90%" />
 </p>
 <p><span class="figure-number">Figure 11: </span>Logical Oracle Plan structure with Table function calls</p>
@@ -632,14 +635,14 @@ its definition.
 </div>
 
 
-<div id="outline-container-orgec37ca1" class="outline-2">
-<h2 id="orgec37ca1"><span class="section-number-2">4</span> A Peek under the covers</h2>
+<div id="outline-container-orgae5ed01" class="outline-2">
+<h2 id="orgae5ed01"><span class="section-number-2">4</span> A Peek under the covers</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-We walk through a sample session of this integrated environment by showing some
+We walk through a sample session of this integrated environment and show some
 examples. The Oracle Instance is loaded with the <a href="http://www.tpc.org/tpcds/">TPCDS dataset</a> and we connect to it via
-<i>Spark Shell</i>. The Spark Configuration has the following settings for this integrated
-environment: parameters such as the connection information and query pushdown instructions.
+<i>Spark Shell</i>. The Spark Configuration for this environment has extra settings
+such as the connection information and query pushdown instructions. 
 </p>
 
 <div class="org-src-container">
@@ -653,7 +656,7 @@ spark.kryo.registrator=org.apache.spark.sql.connector.catalog.oracle.OraKryoRegi
 spark.sql.catalog.oracle=org.apache.spark.sql.connector.catalog.oracle.OracleCatalog
 
 # oracle instance connection information
-spark.sql.catalog.oracle.url=jdbc:oracle:thin:@slcaa334:1531/cdb1_pdb7.regress.rdbms.dev.us.oracle.com
+spark.sql.catalog.oracle.url=dbc:oracle:thin:@den02ads:1531/cdb1_pdb7.dev.us.oracle.com
 spark.sql.catalog.oracle.user=tpcds
 spark.sql.catalog.oracle.password=...
 
@@ -673,17 +676,35 @@ spark.sql.oracle.querysplit.maxfetch.rounds=0.5
 </div>
 
 <p>
-The Spark shell is then started in the normal way, for example in local mode one
+The Spark shell is then started in the normal way; for example in local mode one
 could issue: <code>bin/spark-shell --properties-file spark.oracle.properties --master
 local[*]</code>.
 </p>
 </div>
 
-<div id="outline-container-org48d9157" class="outline-3">
-<h3 id="org48d9157"><span class="section-number-3">4.1</span> Catalog Integration</h3>
+<div id="outline-container-org49100fd" class="outline-3">
+<h3 id="org49100fd"><span class="section-number-3">4.1</span> Catalog Integration</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 The user can browse the Oracle catalog and describe individual tables.
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-scala">sql("use oracle").show()
+sql("show tables").show(10000, false)
+sql("describe store_sales").show(10000, false)
+</pre>
+</div>
+
+
+<div id="org71b23dc" class="figure">
+<p><img src="./images/catalog.png" alt="catalog.png" width="90%" />
+</p>
+<p><span class="figure-number">Figure 12: </span>Catalog Commands</p>
+</div>
+
+<p>
 Oracle has many partitioning schemes such as  <b>RANGE, LIST, INTERVAL, and HASH</b>
 which don't map very well to Spark's value based partitioning scheme; the output
 Spark SQL <code>show partitions</code> command doesn't give the full partitioning picture.
@@ -692,27 +713,19 @@ see the table partitioning details.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scala">sql("use oracle").show()
-sql("show tables").show(10000, false)
-
-// show partitions
+<pre class="src src-scala">// show partitions
 sql("show partitions store_sales").show(1000, false)
 // spark language extension  to see oracle partitions properly
 sql("show oracle partitions store_sales").show(1000, false)
 </pre>
 </div>
-
-
-<div id="org73f9145" class="figure">
-<p><img src="./images/catalog.png" alt="catalog.png" width="90%" />
-</p>
-<p><span class="figure-number">Figure 12: </span>Catalog Commands</p>
-</div>
 </div>
 </div>
 
-<div id="outline-container-orgf089ba3" class="outline-3">
-<h3 id="orgf089ba3"><span class="section-number-3">4.2</span> TPCDS Queries</h3>
+
+
+<div id="outline-container-orgd1c2a28" class="outline-3">
+<h3 id="orgd1c2a28"><span class="section-number-3">4.2</span> TPCDS Queries</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 The <a href="http://www.tpc.org/tpcds/">TPCDS benchmark</a> contains many complex analysis patterns such
@@ -722,8 +735,8 @@ pushed down over 90 of the 99 queries.
 </p>
 </div>
 
-<div id="outline-container-orgfa8c87b" class="outline-4">
-<h4 id="orgfa8c87b"><span class="section-number-4">4.2.1</span> Q1</h4>
+<div id="outline-container-org3299193" class="outline-4">
+<h4 id="org3299193"><span class="section-number-4">4.2.1</span> Q1</h4>
 <div class="outline-text-4" id="text-4-2-1">
 <ul class="org-ul">
 <li>Query is about identifying 'problem' customers.</li>
@@ -765,7 +778,7 @@ shows the Spark Plan and the Oracle Query pushed down. (here again we have
 extended Spark SQL with the <code>explain oracle pushdown</code> command which is similar
 to Spark's <code>explain</code> command with the addition that we show the oracle pushdown
 details). The output shows that for Spark this is a very simple Plan of a custom
-<code>Scan</code> followed by a <code>Project</code>. Figure <a href="#orgfadf9e4">6</a> show the plan visually.
+<code>Scan</code> followed by a <code>Project</code>. Figure <a href="#org2ab2435">6</a> show the plan visually.
 </p>
 <div class="org-src-container">
 <pre class="src src-text">sql(s"explain oracle pushdown $q1").show(1000, false)
@@ -802,14 +815,15 @@ Query is not split
 Contrast this with the plan when <code>spark.sql.oracle.enable.pushdown=false</code>. This
 setting turns of the Query rewrites, so the query plan generated and execution
 is similar to what you would get with a regular 'connector' that provides a
-custom Spark v2 DataSource. The Spark Plan contains Operation to do all the
-Joins, Aggregates&#x2026; only the base Table rows are pulled out of Oracle. Figure
-<a href="#orgfadf9e4">6</a> show the plan visually. Not surprisingly execution with pushdown off
+custom Spark v2 DataSource. The Spark Plan contains Spark Operations to do the
+Joins, Aggregates&#x2026; only the base Table filtering and projection is pushed to Oracle. Figure
+<a href="#org2ab2435">6</a> show the plan visually. Not surprisingly execution with pushdown off
 takes considerably longer to run: 10s of seconds. 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-text">sql(s"explain oracle pushdown $q1").show(1000, false)
+<pre class="src src-text">spark.sqlContext.setConf("spark.sql.oracle.enable.pushdown", "false")
+sql(s"explain oracle pushdown $q1").show(1000, false)
 
 |TakeOrderedAndProject (1)
 +- Project (2)
@@ -906,14 +920,15 @@ Query is not split
 </div>
 </div>
 
-<div id="outline-container-org099b359" class="outline-4">
-<h4 id="org099b359"><span class="section-number-4">4.2.2</span> Pushdown plan for Q5, Q69</h4>
+<div id="outline-container-org2fbafc0" class="outline-4">
+<h4 id="org2fbafc0"><span class="section-number-4">4.2.2</span> Pushdown plan for Q5, Q69</h4>
 <div class="outline-text-4" id="text-4-2-2">
 <p>
-Here are pushdown plans for couple more TPCDS queries.
+Following are pushdown plans for couple more TPCDS queries to show the extent of
+the pushdown we can do.
 </p>
 <ul class="org-ul">
-<li>Query Q5 is a report across Sales, Web and Catalog channels. Its SQL contains
+<li>Query Q5 is a multi star schema report across Sales, Web and Catalog channels. Its SQL contains
 joins, aggregates, unions, CTEs, rollup.</li>
 <li>Query 69 is used to identify customers with different buying behavior in 2
 separate quarters. Its SQL contains joins, aggregates, subquery predicates.</li>
@@ -998,13 +1013,50 @@ Query is not split
 </div>
 </div>
 
-<div id="outline-container-orgb90f242" class="outline-3">
-<h3 id="orgb90f242"><span class="section-number-3">4.3</span> Spark SQL Macros</h3>
+<div id="outline-container-org10eb9a1" class="outline-3">
+<h3 id="org10eb9a1"><span class="section-number-3">4.3</span> Registration and Use of Oracle Functions(Row and Aggregate) in Spark SQL</h3>
 <div class="outline-text-3" id="text-4-3">
+<p>
+We extend the SparkSession with a <code>registerOracleFunction</code> function. The User
+can specify an existing Oracle Function in the form <code>(packageName,
+functionName)</code>. In the following we show the registration and use of Oracle's
+<code>STANDARD.SYS_CONTEXT</code> row and  <a href="https://asktom.oracle.com/pls/apex/f?p=100:11:0::::p11_question_id:15637744429336">STRAGG</a> aggregate functions.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scala">spark.sqlContext.setConf("spark.sql.oracle.enable.pushdown", "true")
+
+import org.apache.spark.sql.oracle._
+
+// REGISTER ROW function
+spark.registerOracleFunction(Some("STANDARD"), "SYS_CONTEXT")
+sql("""
+select 
+  oracle.sys_context('USERENV', 'CLIENT_PROGRAM_NAME') ora_client_pgm
+from sparktest.unit_test
+limit 1
+""".stripMargin).show(10000, false)
+
+// REGISTER AGG function
+spark.registerOracleFunction(None, "STRAGG")
+sql(
+"""
+select c_char_5, 
+       oracle.stragg(c_char_1)
+from sparktest.unit_test
+group by c_char_5
+""".stripMargin).show(10000, false)
+</pre>
 </div>
-<div id="outline-container-org3fee407" class="outline-4">
-<h4 id="org3fee407"><span class="section-number-4">4.3.1</span> Defining Macros</h4>
-<div class="outline-text-4" id="text-4-3-1">
+</div>
+</div>
+<div id="outline-container-orgb4ea522" class="outline-3">
+<h3 id="orgb4ea522"><span class="section-number-3">4.4</span> Spark SQL Macros</h3>
+<div class="outline-text-3" id="text-4-4">
+</div>
+<div id="outline-container-org74f9b15" class="outline-4">
+<h4 id="org74f9b15"><span class="section-number-4">4.4.1</span> Defining Macros</h4>
+<div class="outline-text-4" id="text-4-4-1">
 <p>
 The process of defining Spark SQL Macros is almost identical to defining custom functions in
 Spark. So consider a simple function <code>(i : Int) =&gt; i + 2</code>. Following is how you would
@@ -1024,9 +1076,9 @@ spark.registerMacro("intUDM", spark.udm((i: Int) =&gt; {
 </div>
 </div>
 </div>
-<div id="outline-container-org1f2ed14" class="outline-4">
-<h4 id="org1f2ed14"><span class="section-number-4">4.3.2</span> Tax and Discount Calculation</h4>
-<div class="outline-text-4" id="text-4-3-2">
+<div id="outline-container-orgb8ef255" class="outline-4">
+<h4 id="orgb8ef255"><span class="section-number-4">4.4.2</span> Tax and Discount Calculation</h4>
+<div class="outline-text-4" id="text-4-4-2">
 <p>
 Now consider a <b>tax and discount calculation</b> defined as:
 </p>
@@ -1073,9 +1125,9 @@ spark.registerMacro("taxAndDiscountM", spark.udm({(prodCat : String, amt : Doubl
 </div>
 </div>
 </div>
-<div id="outline-container-orga31ce17" class="outline-4">
-<h4 id="orga31ce17"><span class="section-number-4">4.3.3</span> Query Plan and execution</h4>
-<div class="outline-text-4" id="text-4-3-3">
+<div id="outline-container-orgd80594a" class="outline-4">
+<h4 id="orgd80594a"><span class="section-number-4">4.4.3</span> Query Plan and execution</h4>
+<div class="outline-text-4" id="text-4-4-3">
 <p>
 Now consider a query  on <code>items</code> that invokes the Spark SQL Macro. We show both
 the extended and formatted plans so you can see the logical plan Spark generates
@@ -1154,13 +1206,14 @@ Input [2]: [I_ITEM_ID#1121, taxAndDiscount#1114]
 The analyzed catalyst expression for the`taxDiscount` invocation is below. <b>Since it
  contains no custom function invocation, it is completely pushed to Oracle</b> 
 </p>
-<pre class="example">
-(
+<div class="org-src-container">
+<pre class="src src-text">(
   (cast(I_CURRENT_PRICE#1086 as double) *
   (1.0 - if (((dayofweek(current_date(Some(America/Los_Angeles))) = 1) AND (I_CATEGORY#1093 = alcohol))) 0.05 else 0.0)) *
   (1.0 + CASE WHEN (I_CATEGORY#1093 = grocery) THEN 0.0 WHEN (I_CATEGORY#1093 = alcohol) THEN 10.5 ELSE 9.5 END)
 ) AS taxAndDiscount#1075
 </pre>
+</div>
 
 
 <p>
@@ -1194,7 +1247,7 @@ in the <code>where clause</code></li>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Harish Butani</p>
-<p class="date">Created: 2021-03-20 Sat 11:25</p>
+<p class="date">Created: 2021-03-22 Mon 11:13</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
